@@ -22,10 +22,9 @@ export const load: PageServerLoad = async ({ params }) => {
 
 export const actions: Actions = {
 	updateArticle: async ({ request, params }) => {
-		const { title, content } = Object.fromEntries(await request.formData()) as {
-			title: string
-			content: string
-		}
+		const { title, content } = Object.fromEntries(
+			await request.formData(),
+		) as Record<string, string>
 
 		try {
 			await prisma.article.update({

@@ -10,10 +10,9 @@ export const load: PageServerLoad = async () => {
 
 export const actions: Actions = {
 	createArticle: async ({ request }) => {
-		const { title, content } = Object.fromEntries(await request.formData()) as {
-			title: string
-			content: string
-		}
+		const { title, content } = Object.fromEntries(
+			await request.formData(),
+		) as Record<string, string>
 
 		try {
 			await prisma.article.create({
