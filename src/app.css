@@ -1,0 +1,20 @@
+@tailwind base;
+
+@tailwind components;
+@tailwind utilities;
+
+body {
+	overflow: hidden;
+}
+h2 {
+	@apply text-3xl my-2;
+}
+h3 {
+	@apply text-xl my-2;
+}
+h4 {
+	@apply text-lg my-2;
+}
+p {
+	@apply my-2;
+}

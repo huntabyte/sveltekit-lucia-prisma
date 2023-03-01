@@ -1,14 +1,22 @@
-<form method="POST">
-	<hgroup>
-		<h2>Login</h2>
-		<h3>Welcome back!</h3>
-	</hgroup>
-	<label for="username">Username</label>
-	<input type="text" id="username" name="username" required />
+<script lang="ts">
+	import Button from '$lib/components/form/Button.svelte'
+	import Input from '$lib/components/form/Input.svelte'
+	import Page from '$lib/components/layout/Page.svelte'
+	export let form: any
+	console.log('form: ', form)
+</script>
 
-	<label for="password">Password</label>
-	<input type="password" id="password" name="password" required />
+<Page>
+	<form method="POST">
+		<hgroup>
+			<h2>Login</h2>
+			<h4 class="">Don't have an account? <a href="/register" class="font-medium">Register</a></h4>
+		</hgroup>
+		<div class="divider m-0" />
 
-	<button type="submit">Login</button>
-</form>
-<p>Don't have an account? <a href="/register">Register</a></p>
+		<Input name="username" {form} />
+		<Input name="password" {form} />
+
+		<Button>Login</Button>
+	</form>
+</Page>

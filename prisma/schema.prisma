@@ -6,9 +6,15 @@ generator client {
 }
 
 datasource db {
-    provider = "sqlite"
-    url      = "file:./dev.sqlite"
+    // postgresql://USER:PASSWORD@HOST:PORT/DATABASE
+    provider = "postgres"
+    url      = "postgresql://postgres:Beatbr0s@localhost:5432/otw"
 }
+
+// datasource db {
+//     provider = "sqlite"
+//     url      = "file:./dev.sqlite"
+// }
 
 model Article {
     id      Int    @id @default(autoincrement())
@@ -18,13 +24,106 @@ model Article {
     userId  String
 }
 
+model Series {
+    id           String    @id @unique @default(cuid())
+    createdAt    DateTime? @default(now())
+    lastModified DateTime? @updatedAt
+    event        String?
+    venue        String?
+    eventeid     String?
+    eventwebsite String?
+    races        Race[]
+    comps        Comp[]
+    Event        Event?    @relation(fields: [eventId], references: [id])
+    eventId      String?
+    User         User?     @relation(fields: [userId], references: [id])
+    userId       String?
+    rest         Json?
+}
+
+model Event {
+    id             String        @id @unique @default(cuid())
+    createdAt      DateTime?     @default(now())
+    lastModified   DateTime?     @updatedAt
+    series         Series[]
+    name           String?
+    venue          String?
+    org            Organization? @relation(fields: [organizationId], references: [id])
+    organizationId String?
+}
+
+model Organization {
+    id           String    @id @unique @default(cuid())
+    createdAt    DateTime? @default(now())
+    lastModified DateTime? @updatedAt
+    name         String?
+    Event        Event[]
+}
+
+model Race {
+    id           String    @id @unique @default(cuid())
+    createdAt    DateTime? @default(now())
+    lastModified DateTime? @updatedAt
+    name         String?
+    results      Result[]
+    Series       Series?   @relation(fields: [seriesId], references: [id])
+    seriesId     String?
+}
+
+model Competitors {
+    id           String    @id @unique @default(cuid())
+    createdAt    DateTime? @default(now())
+    lastModified DateTime? @updatedAt
+    name         String?
+    skipper      String?
+    Result       Result?   @relation(fields: [resultId], references: [id])
+    resultId     String?
+}
+
+model Comp {
+    id           String    @id @unique @default(cuid())
+    compId       String?
+    boat         String?
+    helmname     String?
+    rating       String?
+    fleet        String?
+    total        String?
+    nett         String?
+    rank         String?
+    club         String?
+    alias        String?
+    medicalflag  String?
+    exclude      String?
+    high         String?
+    rest         Json?
+    createdAt    DateTime? @default(now())
+    lastModified DateTime? @updatedAt
+    Series       Series?   @relation(fields: [seriesId], references: [id])
+    seriesId     String?
+    Result       Result?   @relation(fields: [resultId], references: [id])
+    resultId     String?
+}
+
+model Result {
+    id           String        @id @unique @default(cuid())
+    createdAt    DateTime?     @default(now())
+    lastModified DateTime?     @updatedAt
+    seriesId     String?
+    competitors  Comp[]
+    Race         Race?         @relation(fields: [raceId], references: [id])
+    raceId       String?
+    Competitors  Competitors[]
+}
+
 model User {
     id       String    @id @unique
     name     String
     username String    @unique
     articles Article[]
+    series   Series[]
     session  Session[]
-    Key      Key[]
+
+    Key Key[]
 
     @@map("user")
 }
