@@ -4,7 +4,8 @@ import { error, fail, redirect } from '@sveltejs/kit'
 
 export const load: PageServerLoad = async () => {
 	return {
-		articles: await prisma.article.findMany({ include: { User: true } })
+		articles: await prisma.article.findMany({ include: { user: true } })
+		// comps: await prisma.competitor.findMany({ include: { User: true } })
 	}
 }
 
@@ -50,7 +51,7 @@ export const actions: Actions = {
 		try {
 			const article = await prisma.article.findUniqueOrThrow({
 				where: {
-					id: Number(id)
+					id: id
 				}
 			})
 
@@ -60,7 +61,7 @@ export const actions: Actions = {
 
 			await prisma.article.delete({
 				where: {
-					id: Number(id)
+					id: id
 				}
 			})
 		} catch (err) {

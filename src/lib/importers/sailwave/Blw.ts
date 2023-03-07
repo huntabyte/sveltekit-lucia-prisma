@@ -1,5 +1,6 @@
 // import { User } from "firebase/auth";
 // import { parse } from 'papaparse'
+import { createId } from '@paralleldrive/cuid2'
 import { formatDate, formatTime } from '../../components/utils/formatters'
 
 interface IBlw {
@@ -19,98 +20,31 @@ export default class Blw {
 	constructor(props: IBlw) {
 		// this.user = props.user;
 		this.data = props.data
+		this.data.cuid = createId()
 	}
+	// this.fileData = this.data
 
 	async getFileData() {
-		// const d = await this.csv
-		///////////////////////////////////////////
-		// no good need to parse for every request
+		this.data.cuid = createId()
 		return this.data
 	}
 
-	// async getFileData() {
-	// 	const texted = await this.file.text()
-	// 	let d = {}
-	// 	const parsed = parse(texted, {
-	// 		complete: (results) => {
-	// 			d = results.data
-	// 		},
-	// 		error: (status, err) => {
-	// 			// TODO
-	// 			return { error: err }
-	// 		}
-	// 	})
-	// 	return d
-	// }
-
-	// papaPromise(file: any): Promise<string[]> | Error {
-	// 	return new Promise((resolve, reject) => {
-	// 		parse(file, {
-	// 			complete(results: any) {
-	// 				resolve(results.data as string[])
-	// 			},
-	// 			error(err: Error) {
-	// 				reject(err)
-	// 			}
-	// 		})
-	// 	})
-	// }
-
-	// papaPromise(file: any): Promise<string[]> | Error {
-	// 	return new Promise((resolve, reject) => {
-	// 		parse(file.NODE_STREAM_INPUT, {
-	// 			complete(results: any) {
-	// 				resolve(results.data as string[])
-	// 			}
-	// 			// error(err: Error) {
-	// 			// 	reject(err)
-	// 			// }
-	// 		})
-	// 	})
-	// }
-
-	// const papa = require("papaparse");
-	// const request = require("request");
-
-	// const options = {/* options */};
-
-	// const dataStream = request.get("https://example.com/myfile.csv");
-	// const parseStream = papa.parse(papa.NODE_STREAM_INPUT, options);
-
-	// dataStream.pipe(parseStream);
-
-	// let data = [];
-	// parseStream.on("data", chunk => {
-	//     data.push(chunk);
-	// });
-
-	// parseStream.on("finish", () => {
-	//     console.log(data);
-	//     console.log(data.length);
-	// });
-
-	async getComps() {
-		let data = await this.getFileData()
-		var compData: any = []
-		var compBoats = data.filter(function (item: any) {
+	getComps() {
+		// let data = await this.getFileData()
+		const compData: any = []
+		const compBoats = this.data.filter(function (item: any) {
 			return item[0] === 'comphigh'
 		})
 		// var sortedBoats = compBoats.sort();
 		compBoats.sort().forEach((compBoat: any) => {
-			interface CompetitorObj {
-				id: number
-				compId: string
-				[x: string | number | symbol]: unknown
-			}
-
-			let competitor: CompetitorObj = {
-				id: 0,
+			let competitor = {
+				id: '0',
 				compId: ''
 			}
 
-			competitor.id = parseInt(compBoat[2])
+			// competitor.id = compBoat[2] + '-' + this.data.cuid
 			competitor.compId = compBoat[2]
-			let compRows = data.filter((item: any) => {
+			let compRows = this.data.filter((item: any) => {
 				var regex = new RegExp(`^comp`, 'g')
 				return item[0].match(regex) && item[2] === compBoat[2]
 			})
@@ -120,70 +54,65 @@ export default class Blw {
 			})
 			compData.push(competitor)
 		}) //each compBoats
-		var sorted = compData!.sort((a: any, b: any) => {
+		const sorted = compData!.sort((a: any, b: any) => {
 			return a.boat - b.boat
 		})
-		//console.log(compData)
+
 		return sorted!
 	} // getComps
 
-	async getResults() {
-		const data = await this.getFileData()
-
+	getResults() {
+		// const data = await this.getFileData()
 		const resultsArr: any = []
 		// use rdisc to get an individuals result
-		const results = data.filter((item: any) => {
+		const results = this.data.filter((item: any) => {
 			return item[0] === 'rdisc'
 		})
 		results.forEach((result: any) => {
 			// Results in blw file have no prefix to speak of (just an r)
 			// So we need to find each row individually
-
-			// I would like to see a differrent solution for undefined
-			// we cannot pass undefined to firestore
-
-			// const raceDates = data.filter((item) => {
-			//   return item[0] === "racedate";
-			// });
-			// // console.log('raceDates: ', raceDates);
-
-			// const raceDate = raceDates.filter((item) => {
-			//   return item[3] === result[3];
-			// });
-
-			// let date;
-			// if (raceDate[0] && raceDate[0][1]) {
-			//   date = formatDate(raceDate[0][1]);
-			// } else {
-			//   date = "";
-			// }
-			// // const date = formatDate(dateString)
-
 			const resultRow = {
-				id: `${result[3]}-${result[2]}`,
-				compId: result[2],
-				raceid: result[3],
+				// id: `${result[3]}-${result[2]}-${this.data.cuid}`,
+				resultId: `${result[3]}-${result[2]}`,
+				compId: result[2] + '-' + this.data.cuid,
+				raceId: result[3] + '-' + this.data.cuid,
 				// date: date,
-				finish: this.resultHelp('rft', data, result) ? this.resultHelp('rft', data, result) : '',
-				start: this.resultHelp('rst', data, result) ? this.resultHelp('rst', data, result) : '',
-				points: this.resultHelp('rpts', data, result) ? this.resultHelp('rpts', data, result) : '',
-				position: this.resultHelp('rpos', data, result)
-					? this.resultHelp('rpos', data, result)
+				finish: this.resultHelp('rft', this.data, result)
+					? this.resultHelp('rft', this.data, result)
 					: '',
-				discard: this.resultHelp('rdisc', data, result)
-					? this.resultHelp('rdisc', data, result)
+				start: this.resultHelp('rst', this.data, result)
+					? this.resultHelp('rst', this.data, result)
 					: '',
-				corrected: this.resultHelp('rcor', data, result)
-					? this.resultHelp('rcor', data, result)
+				points: this.resultHelp('rpts', this.data, result)
+					? this.resultHelp('rpts', this.data, result)
 					: '',
-				rrestyp: this.resultHelp('rrestyp', data, result)
-					? this.resultHelp('rrestyp', data, result)
+				position: this.resultHelp('rpos', this.data, result)
+					? this.resultHelp('rpos', this.data, result)
 					: '',
-				elapsed: this.resultHelp('rele', data, result) ? this.resultHelp('rele', data, result) : '',
-				srat: this.resultHelp('srat', data, result) ? this.resultHelp('srat', data, result) : '',
-				rewin: this.resultHelp('rewin', data, result) ? this.resultHelp('rewin', data, result) : '',
-				rrwin: this.resultHelp('rrwin', data, result) ? this.resultHelp('rrwin', data, result) : '',
-				rrset: this.resultHelp('rrset', data, result) ? this.resultHelp('rrset', data, result) : ''
+				discard: this.resultHelp('rdisc', this.data, result)
+					? this.resultHelp('rdisc', this.data, result)
+					: '',
+				corrected: this.resultHelp('rcor', this.data, result)
+					? this.resultHelp('rcor', this.data, result)
+					: '',
+				rrestyp: this.resultHelp('rrestyp', this.data, result)
+					? this.resultHelp('rrestyp', this.data, result)
+					: '',
+				elapsed: this.resultHelp('rele', this.data, result)
+					? this.resultHelp('rele', this.data, result)
+					: '',
+				srat: this.resultHelp('srat', this.data, result)
+					? this.resultHelp('srat', this.data, result)
+					: '',
+				rewin: this.resultHelp('rewin', this.data, result)
+					? this.resultHelp('rewin', this.data, result)
+					: '',
+				rrwin: this.resultHelp('rrwin', this.data, result)
+					? this.resultHelp('rrwin', this.data, result)
+					: '',
+				rrset: this.resultHelp('rrset', this.data, result)
+					? this.resultHelp('rrset', this.data, result)
+					: ''
 			}
 			resultsArr.push(resultRow)
 		}) // forEach
@@ -204,9 +133,9 @@ export default class Blw {
 
 	// I don't think i use this
 	// each race has fleets
-	async getFleets() {
-		const data = await this.getFileData()
-		var fleetsRaw: any[] = data.filter((item: any) => {
+	getFleets() {
+		// const data = await this.getFileData()
+		var fleetsRaw: any[] = this.data.filter((item: any) => {
 			return item[0] === 'serpubgroupvalues'
 		})
 		var fleets = fleetsRaw[0][1].match(/[^|]+/g)
@@ -214,26 +143,28 @@ export default class Blw {
 		return fleets
 	}
 
-	async getRaces() {
-		const data = await this.getFileData()
+	getRaces() {
+		// const data = await this.getFileData()
 
 		// new object to be returned
 		let raceData: any = []
 		// Find all raceids by getting known csv row
-		const races = data.filter((item: any) => {
+		const races = this.data.filter((item: any) => {
 			return item[0] === 'racerank'
 		})
 		// For each race push data to new object
 		races.forEach((race: any) => {
 			let raceObj = {
+				id: '',
 				index: '',
-				raceid: '',
+				raceId: '',
 				starts: '',
 				name: '',
 				rank: ''
 			}
-			raceObj.raceid = race[3]
-			let resultRows = data.filter((item: any) => {
+			// raceObj.id = race[3] + '-' + this.data.cuid
+			raceObj.raceId = race[3]
+			let resultRows = this.data.filter((item: any) => {
 				var regex = new RegExp(`^race`, 'g')
 				return item[0].match(regex) && item[3] === race[3]
 			})
@@ -267,7 +198,6 @@ export default class Blw {
 					raceObj[newName] = item[1]
 				}
 				raceObj.index = '' + idx
-				// if(!item)
 			}) // resultRows.forEach
 
 			// now add the starts to raceObj
@@ -279,39 +209,42 @@ export default class Blw {
 				raceObj.name = `Race ${raceObj.rank}`
 			}
 			raceData.push(raceObj)
-			// console.log("raceData: ", raceData);
 		})
 
 		return raceData!
 	} // getRaces
 
-	async getSeries() {
-		const data = await this.getFileData()
-		// console.log('data: ', data)
+	getEvent() {
+		// const data = await this.getFileData()
 		// add file info
-		const seriesRows = data.filter((item: any) => {
+		const eventRows = this.data.filter((item: string[]) => {
 			const regex = new RegExp(`^ser`, 'g')
 			return item[0].match(regex)
 		})
 
 		// would be a long interface or type so just allow everything
 		// maybe in the future we wont need everything from sailwave
-		type SeriesObj = {
+		type EventObj = {
 			event: string
+			venue?: string
+			eventwebsite?: string
+			eventeid?: string
 			__owner?: string
-			__event?: string
 			__public?: boolean
+			seriesId?: string
 			lastModifiedDate?: string
 			includecorrected?: string
+
 			resultType?: string
 			[x: string | number | symbol]: unknown
 		}
 
-		let seriesObj: SeriesObj = { event: '' }
+		// let eventObj = { event: '', eventeid: '', cuid: this.data.cuid }
+		let eventObj
 
-		seriesRows.forEach((item: any) => {
+		eventRows.forEach((item: string[]) => {
 			const newName = item[0].replace('ser', '')
-			seriesObj[newName] = item[1]
+			eventObj[newName] = item[1]
 		})
 
 		// make an object for fileInfo to organize better
@@ -322,7 +255,7 @@ export default class Blw {
 		// _fileInfo.lastModifiedDate = this.file.lastModifiedDate
 		// _fileInfo.size = this.file.size
 		// const returnObj = { ...seriesObj, _fileInfo }
-		const returnObj = { ...seriesObj }
+		const returnObj = { ...eventObj }
 
 		// return series object and fileinfo
 		return returnObj

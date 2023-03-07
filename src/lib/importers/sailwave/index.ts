@@ -1,136 +1,198 @@
 import { prisma } from '$lib/server/prisma'
-import { fail } from '@sveltejs/kit'
+import { error, fail } from '@sveltejs/kit'
 import Blw from './Blw'
 
-export const Populate = async ({ data, userId }) => {
+export const Populate = async ({ data, userId, file }) => {
 	// no file so exit
-	if (!data) return
+	if (!data) throw error(400, { message: 'Populate function requires data' })
 
 	// Make new Blw class
 	const blw = new Blw({ data })
 
-	// need to check the series first
-	const seriesData = await blw.getSeries()
+	// // need to check the series first
+	// const eventData = await blw.getEvent()
 
-	// add owner to series data
-	seriesData.__owner = userId
+	// // add owner to series data
+	// eventData.__owner = userId
 
-	// make series public by default
-	let __public = true
-	// will need to necessary changes to import and seriesEdit to control from ui
-	seriesData.__public = __public
+	// // make series public by default
+	// let __public = true
+	// // will need to necessary changes to import and seriesEdit to control from ui
+	// eventData.__public = __public
 
-	// add blank event
-	seriesData.__event = ''
+	// // add blank event
+	// eventData.__event = ''
 
-	if (seriesData.includecorrected === '1') {
-		seriesData.resultType = 'corrected'
-	}
-	const sId = 'hey'
-	const added = addTables(sId)
+	// if (eventData.includecorrected === '1') {
+	// 	eventData.resultType = 'corrected'
+	// }
 
-	// Find dupicates
-	// maybe a comination of filename and sailwave series id
-	// const copy = prisma.series.findFirst({
-	// 	where: { userId: userId }
-	// })
-	// console.log('copy: ', await copy)
-	// console.log('seriesData: ', seriesData)
+	// const { user, event, venue, venueemail, eventwebsite, eventeid, ...rest } = eventData
+	// const { name, lastModified } = file
 
-	// const { event, venue, eventwebsite, eventeid, ...rest } = seriesData
-	// const series = prisma.series.create({
+	// // Find dupicates
+	// // maybe a comination of filename and sailwave eventeid then verify lastModified matches
+	// // either of these can't be trusted. There can easily be duplicates
+
+	// const eventCreate = await prisma.event.create({
 	// 	data: {
-	// 		userId,
-	// 		event,
-	// 		venue: venue as string,
-	// 		eventwebsite: eventwebsite as string,
-	// 		eventeid: eventeid as string,
-	// 		...rest
+	// 		fileInfo: { name, lastModified },
+	// 		userId: userId,
+	// 		name: event,
+	// 		venueName: venue,
+	// 		eventwebsite: eventwebsite,
+	// 		eventeid: eventeid as string, // ???
+	// 		rest: { ...rest } as {}
+	// 		// venue: {
+	// 		// 	connectOrCreate: {
+	// 		// 		where: { name: venue ? venue : 'Unknown venue' },
+	// 		// 		create: { name: venue as string, email: venueemail as string }
+	// 		// 	}
+	// 		// }
 	// 	}
 	// })
 
-	// // Find copies and write
-	// let sId
-	// const findCopyFile = query(
-	// 	collectionGroup(db, 'series'),
-	// 	where('__fileInfo.name', '==', seriesData.__fileInfo.name)
-	// )
+	// const eventId = eventCreate.id
+	function test() {
+		// This could take in a cuid
+		// the cuid could be mapped to connect statements
+		// eg:
+		//	comp: {
+		// 		create: {...},
+		// 		event: {
+		// 			connect: {cuid: cuid}
+		// 	}
 
-	// const copies = await getDocs(findCopyFile)
-	// // No copies so write as is
-	// if (!copies.empty) {
-	// 	copies.forEach(async (copyDoc) => {
-	// 		if (copy) {
-	// 			const existingFileName = seriesData.__fileInfo.name
-	// 			const fileNameParts = existingFileName.split('.')
-	// 			seriesData.__fileInfo.name = `${fileNameParts[0]}-of-${copyDoc.id}.${fileNameParts[1]}`
-	// 			seriesData.event = `${seriesData.event}-copy`
-	// 			sId = await addDoc(seriesRef, seriesData)
-	// 			await addTables(sId)
-	// 		} else {
-	// 			sId = await updateDoc(doc(seriesRef, copyDoc.id), seriesData)
-	// 			await addTables(sId || null)
-	// 		}
-	// 	})
-	// } else {
-	// 	sId = await addDoc(seriesRef, seriesData)
-	// 	await addTables(sId)
-	// }
-
-	async function addTables(sId) {
-		// i wanna make comps top level but put race specific shit on the race
-		const compsData = await blw.getComps()
-
-		// races are races
-		const racesData = await blw.getRaces()
-
-		//results are results
-		const resultsData = await blw.getResults()
-
-		// Map comps to db
-		await compsData.forEach(async (comp: any, idx) => {
-			// need to add each comp to competitor table
-			// include seriesId and _uid
-			// console.log('comp: ', idx, comp.boat)
-			try {
-				await prisma.comp.create({
-					data: {
-						compId: comp.compId,
-						seriesId: sId,
-						boat: comp.boat,
-						fleet: comp.fleet,
-						club: comp.club,
-						total: comp.total,
-						nett: comp.nett,
-						rank: comp.rank,
-						exclude: comp.exclude,
-						alias: comp.alias,
-						rating: comp.rating,
-						helmname: comp.helmname,
-						high: comp.high
+		// ////////////////////////////////////////////////////////////////////////////////////////////////////
+		// need to set up some kind of sandbox for this so i dont have to go through auth everytime
+		// maybe a seed file to get me logged in
+		// Regardless Blw is going to have to sanitize the data before this step
+		// Crux is that the object here needs to be perfect!!!! again santize in Blw
+		///////////////////////////////////////////////////////////////////////////////////////////
+		return {
+			data: {
+				event: {
+					create: blw.getEvent(),
+					race: {
+						create: blw.getRaces(),
+						result: {
+							create: blw.getResults()
+						},
+						comp: {
+							create: blw.getComps()
+						}
 					}
-				})
-			} catch (err) {
-				return fail(400, { message: 'compsData failed' })
+				}
 			}
-		})
-
-		// Map race to firestore
-		await racesData.forEach((race: any) => {
-			// console.log('race: ', race)
-			// setDoc(doc(seriesRef, sId.id, 'races', race.raceid), {
-			// 	_seriesid: sId.id,
-			// 	...race
-			// })
-		})
-
-		// Map results to firestore
-		await resultsData.forEach((result: any) => {
-			// console.log('result: ', result)
-			// setDoc(doc(seriesRef, sId.id, 'results', result.id), {
-			// 	_seriesid: sId.id,
-			// 	...result
-			// })
-		})
+		}
 	}
+
+	addTables()
+
+	async function addTables() {
+		const stuff = test()
+		try {
+			// await prisma.event.create(stuff)
+		} catch (error) {}
+	}
+
+	// const added = addTables()
+
+	// async function addTables() {
+	// 	// need to be recursive to be sure to add relationships as needed
+	// 	await writeComps()
+	// 	await writeRaces()
+	// 	await writeResults()
+
+	// 	async function writeRaces() {
+	// 		const racesData = await blw.getRaces()
+	// 		await racesData.forEach(async (race: any) => {
+	// 			// console.log('race: ', race)
+	// 			const { id, raceId, name, rank, sailed, starts, date, time, notes, ...rest } = await race
+	// 			console.log('writeRaces.raceId: ', id)
+	// 			try {
+	// 				await prisma.race.create({
+	// 					data: {
+	// 						id: id,
+	// 						raceId: raceId,
+	// 						eventId: eventId,
+	// 						name: name,
+	// 						rank: rank,
+	// 						sailed: sailed,
+	// 						date: date,
+	// 						time: time,
+	// 						notes: notes,
+	// 						rest: { ...rest },
+	// 						starts: starts
+	// 					}
+	// 				})
+	// 			} catch (err) {
+	// 				console.log('err: ', err)
+	// 				return fail(400, { message: 'racesData failed' })
+	// 			}
+	// 			// console.log('raceRow: ', raceRow)
+	// 		})
+	// 	}
+
+	// 	async function writeComps() {
+	// 		const compsData = await blw.getComps()
+	// 		await compsData.forEach(async (comp: any) => {
+	// 			const { id, boat, fleet, club, helmname, ...rest } = await comp
+
+	// 			try {
+	// 				return await prisma.comp.create({
+	// 					data: {
+	// 						id: id,
+	// 						compId: comp.compId,
+	// 						eventId: eventId,
+	// 						boat: boat,
+	// 						skipper: helmname,
+	// 						fleet: fleet,
+	// 						club: club,
+	// 						rest: rest
+	// 					}
+	// 				})
+	// 			} catch (err) {
+	// 				console.log('err: ', err)
+	// 				return fail(400, { message: 'compsData failed' })
+	// 			}
+	// 		})
+	// 	}
+
+	// 	async function writeResults() {
+	// 		const resultsData = await blw.getResults()
+	// 		await resultsData.forEach(async (result: any) => {
+	// 			// console.log('result: ', result)
+	// 			console.log('writeResults.raceId: ', result.raceId)
+	// 			try {
+	// 				// console.log('result: ', result)
+	// 				await prisma.result.create({
+	// 					data: {
+	// 						resultId: result.resultId,
+	// 						eventId: eventId,
+	// 						compId: result.compId,
+	// 						raceId: result.raceId,
+	// 						finish: result.finish,
+	// 						start: result.start,
+	// 						points: result.points,
+	// 						position: result.position,
+	// 						discard: result.discard,
+	// 						corrected: result.corrected,
+	// 						rrestyp: result.rrestyp,
+	// 						elasped: result.elasped,
+	// 						srat: result.srat,
+	// 						rewin: result.rewin,
+	// 						rrwin: result.rrwin,
+	// 						rrset: result.rrset
+	// 						// ********************
+	// 						// rest included id
+	// 						// rest: result.rest
+	// 					}
+	// 				})
+	// 			} catch (err) {
+	// 				console.log('err: ', err)
+	// 			}
+	// 		})
+	// 	}
+	// }
 } // populate

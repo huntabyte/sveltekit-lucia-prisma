@@ -1,13 +1,7 @@
-<script>
+<script lang="ts">
 	import Button from '$lib/components/form/Button.svelte'
 	import Page from '$lib/components/layout/Page.svelte'
-	// import { Populate } from '$lib/importers/sailwave'
-	// import Blw from '$lib/importers/sailwave/Blw'
-
-	async function importFile({ target }) {
-		const file = target.files[0]
-		// const pop = Populate({ file, userId: 'userId' })
-	}
+	export let data
 </script>
 
 <Page>
@@ -17,8 +11,22 @@
 			type="file"
 			name="file"
 			class="file-input file-input-bordered file-input-accent w-full max-w-md"
-			on:change={importFile}
 		/>
 		<Button>Import</Button>
 	</form>
+
+	{#each data.events as event}
+		<div class="my-4 border rounded-lg border-primary p-2 w-full max-w-md">
+			<h2>{@html event.name}</h2>
+			<a
+				href={event.eventwebsite && event.eventwebsite.startsWith('http://')
+					? event.eventwebsite
+					: `http://${event.eventwebsite}`}>{event.eventwebsite}</a
+			>
+			<div class="flex justify-between mr-4">
+				<p>{event.venueName}</p>
+				<p>{event.user.name}</p>
+			</div>
+		</div>
+	{/each}
 </Page>

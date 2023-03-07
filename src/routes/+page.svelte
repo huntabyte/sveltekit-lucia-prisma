@@ -15,7 +15,7 @@
 				{@html article.content}
 			</p>
 			<!-- {console.log(article)} -->
-			<div class="text-sm p-4 text-right">{article.User.name}</div>
+			<div class="text-sm p-4 text-right">{article.user.name}</div>
 			{#if article.userId === data.user?.userId}
 				<div class="flex justify-center gap-4 mb-4">
 					<form action="?/deleteArticle&id={article.id}" method="POST">
