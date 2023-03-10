@@ -1,31 +1,41 @@
 import type { Actions, PageServerLoad } from '../$types'
-import { prisma } from '$lib/server/prisma'
-import { error, fail, redirect } from '@sveltejs/kit'
+import { redirect } from '@sveltejs/kit'
 import { Populate } from '$lib/importers/sailwave'
-import { browser } from '$app/environment'
-import fs from 'node:fs'
-import { NODE_STREAM_INPUT, parse } from 'papaparse'
+
+import { parse } from 'papaparse'
+import { prisma } from '$lib/server/prisma'
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const session = await locals.validate()
-	// console.log('session: ', session)
 	// If not logged in redirect
 	if (!session) {
 		throw redirect(302, '/')
 	}
+	const events = await prisma.event.findMany({ include: { Publisher: true } })
+	const orgs = await prisma.organization.findMany({
+		where: { ownerId: session.userId }
+	})
+	return {
+		events,
+		orgs
+	}
 }
 
 export const actions: Actions = {
-	default: async ({ request, locals }) => {
-		// console.log('locals: ', locals)
-		const { file }: any = Object.fromEntries(await request.formData())
-
+	default: async (input) => {
+		// console.log('input: ', await input.locals.validate())
+		const { request, locals, params, cookies } = input
+		const fd = await request.formData()
+		const formData: any = Object.fromEntries(fd)
+		// console.log('formData: ', formData)
+		const { file, org } = formData
+		// console.log('file: ', file)
 		const texted = await file.text()
-
 		const parsed = parse(texted, {
-			complete: (results) => {
+			complete: async (results) => {
+				const uid = await input.locals.validate()
 				// console.log('results.data: ', results.data)
-				Populate({ data: results.data, userId: 'hey' })
+				Populate({ data: results.data, userId: uid?.userId, file: file, orgId: org })
 				// return results.data
 			},
 			error: (status, err) => {

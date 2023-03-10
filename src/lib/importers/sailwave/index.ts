@@ -1,136 +1,109 @@
 import { prisma } from '$lib/server/prisma'
-import { fail } from '@sveltejs/kit'
+import { error } from '@sveltejs/kit'
 import Blw from './Blw'
 
-export const Populate = async ({ data, userId }) => {
+declare global {
+	namespace PrismaJson {
+		// you can use classes, interfaces, types, etc.
+		type EventJson = {
+			venueemail: string
+			venuewebsite: string
+			venueburgee: string
+		}
+	}
+}
+
+export const Populate = async ({ data, userId, file, orgId }) => {
 	// no file so exit
-	if (!data) return
+	if (!data) throw error(400, { message: 'Populate function requires data' })
 
 	// Make new Blw class
-	const blw = new Blw({ data })
+	const blw = new Blw({ data, file })
 
-	// need to check the series first
-	const seriesData = await blw.getSeries()
-
-	// add owner to series data
-	seriesData.__owner = userId
-
-	// make series public by default
-	let __public = true
-	// will need to necessary changes to import and seriesEdit to control from ui
-	seriesData.__public = __public
-
-	// add blank event
-	seriesData.__event = ''
-
-	if (seriesData.includecorrected === '1') {
-		seriesData.resultType = 'corrected'
-	}
-	const sId = 'hey'
-	const added = addTables(sId)
-
-	// Find dupicates
-	// maybe a comination of filename and sailwave series id
-	// const copy = prisma.series.findFirst({
-	// 	where: { userId: userId }
-	// })
-	// console.log('copy: ', await copy)
-	// console.log('seriesData: ', seriesData)
-
-	// const { event, venue, eventwebsite, eventeid, ...rest } = seriesData
-	// const series = prisma.series.create({
-	// 	data: {
-	// 		userId,
-	// 		event,
-	// 		venue: venue as string,
-	// 		eventwebsite: eventwebsite as string,
-	// 		eventeid: eventeid as string,
-	// 		...rest
-	// 	}
-	// })
-
-	// // Find copies and write
-	// let sId
-	// const findCopyFile = query(
-	// 	collectionGroup(db, 'series'),
-	// 	where('__fileInfo.name', '==', seriesData.__fileInfo.name)
-	// )
-
-	// const copies = await getDocs(findCopyFile)
-	// // No copies so write as is
-	// if (!copies.empty) {
-	// 	copies.forEach(async (copyDoc) => {
-	// 		if (copy) {
-	// 			const existingFileName = seriesData.__fileInfo.name
-	// 			const fileNameParts = existingFileName.split('.')
-	// 			seriesData.__fileInfo.name = `${fileNameParts[0]}-of-${copyDoc.id}.${fileNameParts[1]}`
-	// 			seriesData.event = `${seriesData.event}-copy`
-	// 			sId = await addDoc(seriesRef, seriesData)
-	// 			await addTables(sId)
-	// 		} else {
-	// 			sId = await updateDoc(doc(seriesRef, copyDoc.id), seriesData)
-	// 			await addTables(sId || null)
-	// 		}
-	// 	})
-	// } else {
-	// 	sId = await addDoc(seriesRef, seriesData)
-	// 	await addTables(sId)
-	// }
-
-	async function addTables(sId) {
-		// i wanna make comps top level but put race specific shit on the race
-		const compsData = await blw.getComps()
-
-		// races are races
-		const racesData = await blw.getRaces()
-
-		//results are results
-		const resultsData = await blw.getResults()
-
-		// Map comps to db
-		await compsData.forEach(async (comp: any, idx) => {
-			// need to add each comp to competitor table
-			// include seriesId and _uid
-			// console.log('comp: ', idx, comp.boat)
-			try {
-				await prisma.comp.create({
-					data: {
+	function upsertObj() {
+		const event = blw.getEvent()
+		const { eventeid } = event
+		const upObj = {
+			...event,
+			Publisher: {
+				connect: { id: userId }
+			},
+			Organization: {
+				connect: { id: orgId }
+			},
+			Venue: {
+				connectOrCreate: {
+					where: { name: event.name },
+					create: {
+						name: event.venueName,
+						// @ts-ignore
+						email: event.rest.venueemail,
+						// @ts-ignore
+						website: event.rest.venuewebsite,
+						// @ts-ignore
+						burgee: event.rest.venueburgee
+					}
+				}
+			},
+			Comp: {
+				create: blw.getComps().map((comp) => {
+					return {
 						compId: comp.compId,
-						seriesId: sId,
-						boat: comp.boat,
-						fleet: comp.fleet,
-						club: comp.club,
-						total: comp.total,
-						nett: comp.nett,
-						rank: comp.rank,
-						exclude: comp.exclude,
-						alias: comp.alias,
-						rating: comp.rating,
-						helmname: comp.helmname,
-						high: comp.high
+						boat: comp.boat ?? '',
+						skipper: comp.helmname ?? '',
+						fleet: comp.fleet ?? '',
+						club: comp.club ?? '',
+						rest: comp
+						// Publisher: {
+						// 	connect: { id: userId }
+						// }
 					}
 				})
-			} catch (err) {
-				return fail(400, { message: 'compsData failed' })
+			},
+			Race: {
+				create: blw.getRaces().map((race) => {
+					return {
+						...race,
+						Results: {
+							create: blw.getResults(race.raceId).map((result) => {
+								return {
+									resultId: result.resultId,
+									finish: result.finish,
+									start: result.start,
+									points: result.points,
+									position: result.position,
+									discard: result.discard,
+									corrected: result.corrected,
+									rrestyp: result.rrestyp,
+									elasped: result.elasped,
+									Comp: {
+										connect: { compId: result.compId }
+									},
+									Event: {
+										connect: { eventeid: event.eventeid }
+									}
+								}
+							})
+						}
+					}
+				})
 			}
-		})
+		}
+		return {
+			where: { eventeid: eventeid },
+			update: {},
+			create: upObj
+		}
+	}
 
-		// Map race to firestore
-		await racesData.forEach((race: any) => {
-			// console.log('race: ', race)
-			// setDoc(doc(seriesRef, sId.id, 'races', race.raceid), {
-			// 	_seriesid: sId.id,
-			// 	...race
-			// })
-		})
+	addTables()
 
-		// Map results to firestore
-		await resultsData.forEach((result: any) => {
-			// console.log('result: ', result)
-			// setDoc(doc(seriesRef, sId.id, 'results', result.id), {
-			// 	_seriesid: sId.id,
-			// 	...result
-			// })
-		})
+	async function addTables() {
+		try {
+			// console.log('upsertObj(): ', upsertObj())
+			await prisma.event.upsert(upsertObj())
+		} catch (error: any) {
+			console.log('error: ', error.message)
+		}
 	}
 } // populate
