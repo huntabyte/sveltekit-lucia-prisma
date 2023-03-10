@@ -11,9 +11,13 @@ export const load: PageServerLoad = async ({ locals }) => {
 	if (!session) {
 		throw redirect(302, '/')
 	}
-	const events = await prisma.event.findMany({ include: { user: true } })
+	const events = await prisma.event.findMany({ include: { Publisher: true } })
+	const orgs = await prisma.organization.findMany({
+		where: { ownerId: session.userId }
+	})
 	return {
-		events
+		events,
+		orgs
 	}
 }
 
@@ -22,18 +26,16 @@ export const actions: Actions = {
 		// console.log('input: ', await input.locals.validate())
 		const { request, locals, params, cookies } = input
 		const fd = await request.formData()
-
-		// const user = await db.getUserFromSession(cookies.get('sessionid'));
 		const formData: any = Object.fromEntries(fd)
 		// console.log('formData: ', formData)
-		const { file } = formData
+		const { file, org } = formData
 		// console.log('file: ', file)
 		const texted = await file.text()
 		const parsed = parse(texted, {
 			complete: async (results) => {
 				const uid = await input.locals.validate()
 				// console.log('results.data: ', results.data)
-				Populate({ data: results.data, userId: uid?.userId, file: file })
+				Populate({ data: results.data, userId: uid?.userId, file: file, orgId: org })
 				// return results.data
 			},
 			error: (status, err) => {
