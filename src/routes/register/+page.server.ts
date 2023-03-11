@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import { auth } from '$lib/server/lucia'
 import { fail, redirect } from '@sveltejs/kit'
 import type { Actions, PageServerLoad } from './$types'
@@ -8,7 +9,6 @@ export const load: PageServerLoad = async ({ locals }) => {
 		throw redirect(302, '/')
 	}
 }
-import { z } from 'zod'
 
 const registerSchema = z
 	.object({
@@ -78,9 +78,8 @@ export const actions: Actions = {
 				data: rest,
 				errors
 			}
-			// console.error(err)
-			// return fail(400, { message: 'Could not register user' })
 		}
+
 		throw redirect(302, '/login')
 	}
 }

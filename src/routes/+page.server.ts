@@ -10,6 +10,19 @@ export const load: PageServerLoad = async () => {
 }
 
 export const actions: Actions = {
+	setTheme: async ({ url, cookies }) => {
+		const theme = url.searchParams.get('theme')
+		const redirectTo = url.searchParams.get('redirectTo')
+
+		if (theme) {
+			cookies.set('colorTheme', theme, {
+				path: '/',
+				maxAge: 60 * 60 * 24 * 365
+			})
+		}
+
+		throw redirect(303, redirectTo ?? '/')
+	},
 	createArticle: async ({ request, locals }) => {
 		const { user, session } = await locals.validateUser()
 		if (!(user && session)) {

@@ -23,10 +23,6 @@ export const load: PageServerLoad = async ({ locals }) => {
 	if (session) {
 		throw redirect(302, '/')
 	}
-	console.log('session: ', session)
-	// const orgs = prisma.organization.findMany({
-	// 	where: { userId: user.uid }
-	// })
 }
 
 export const actions: Actions = {
