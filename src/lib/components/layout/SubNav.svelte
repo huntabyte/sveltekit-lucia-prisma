@@ -14,7 +14,7 @@
 	<div class="flex h-full items-center">
 		<div class="text-3xl font-semibold">{title}</div>
 	</div>
-	<div class="flex gap-1">
+	<!-- <div class="flex gap-1">
 		<div class="tooltip-open tooltip-bottom" data-tip="Edit">
 			<div class=" btn-ghost btn-circle btn">
 				<Icon icon="mingcute:add-circle-fill" width="24" />
@@ -23,7 +23,7 @@
 		<div class=" btn-ghost btn-circle btn">
 			<Icon icon="mingcute:file-upload-fill" width="24" />
 		</div>
-	</div>
+	</div> -->
 </div>
 
 <style>

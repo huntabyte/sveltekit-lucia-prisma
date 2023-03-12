@@ -1,5 +1,5 @@
 {
-	"name": "sk-prisma-quickstart",
+	"name": "svell-me",
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
@@ -42,13 +42,16 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@dicebear/collection": "^5.3.4",
+		"@dicebear/core": "^5.3.4",
 		"@lucia-auth/adapter-prisma": "^0.4.0",
 		"@lucia-auth/sveltekit": "^0.6.2",
 		"@paralleldrive/cuid2": "^2.2.0",
 		"@picocss/pico": "^1.5.7",
 		"@prisma/client": "^4.11.0",
 		"daisyui": "^2.50.2",
-		"lucia-auth": "^0.6.0",
+		"lucia-auth": "^0.9.0",
+		"lucia-sveltekit": "^0.14.3",
 		"papaparse": "^5.3.2",
 		"prisma-json-types-generator": "^2.2.3",
 		"zod": "^3.20.6"

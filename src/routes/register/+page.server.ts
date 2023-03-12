@@ -71,8 +71,8 @@ export const actions: Actions = {
 					username: result.username
 				}
 			})
-		} catch (err: any) {
-			const { fieldErrors: errors } = err.flatten()
+		} catch (error: any) {
+			const { fieldErrors: errors } = error.flatten()
 			const { password, passwordConfirm, ...rest } = formData
 			return {
 				data: rest,

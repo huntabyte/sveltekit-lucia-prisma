@@ -11,7 +11,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		})
 
 		return {
-			orgs
+			orgs: orgs
 		}
 	} catch (error) {
 		console.log('error: ', error)

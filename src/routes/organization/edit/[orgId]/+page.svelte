@@ -12,7 +12,7 @@
 <Page>
 	<form method="POST">
 		<hgroup>
-			{#if org.name === 'New Organization'}
+			{#if org?.name === 'New Organization'}
 				<h2>Add a new Organization</h2>
 			{:else}
 				<h2>Edit Organization</h2>

@@ -25,7 +25,7 @@
 				{/if}
 				<option>None</option>
 			</select>
-			<a href="/organization/new" class="btn btn-primary btn-circle btn-sm">
+			<a href="/organization/edit/new" class="btn btn-primary btn-circle btn-sm">
 				<Icon class="text-3xl" icon="ic:baseline-add" />
 			</a>
 		</div>

@@ -6,14 +6,12 @@
 	import SubNav from '$lib/components/layout/SubNav.svelte'
 
 	export let data
-
 	console.log('data: ', data)
-	let open = false
 
+	let open = false
 	function handleClickOutside() {
 		open = false
 	}
-
 	const toggleOpen = () => (open = !open)
 </script>
 
@@ -21,56 +19,71 @@
 	<div class="fixed top-0 z-20  w-full ">
 		<nav class="navbar border-base-300 text-secondary-content  ">
 			<button on:click={toggleOpen} class="btn-ghost btn hover:bg-transparent">
-				<Icon icon="ci:hamburger-lg" />
+				<Icon class="text-3xl text-base-300" icon="ci:hamburger-lg" />
 			</button>
 			<div class="user-nav">
 				<!-- <SignOut /> -->
-				<button class="btn btn-sm">sign out</button>
-				<div
-					class="dropdown-end dropdown avatar rounded-full border-2 border-neutral-content bg-base-200 drop-shadow-lg focus:bg-base-100"
-				>
-					<div tabindex="-1" class="w-10 rounded-full ">
-						<!-- <img src={$user?.photoURL} alt={$user?.displayName} /> -->
-						<!-- <img src="" alt=""> -->
-						<p>img</p>
-					</div>
-					<ul
-						tabindex="-1"
-						class=" dropdown-content menu rounded-box w-52 bg-base-100 p-2 text-neutral-content shadow"
+				{#if data.user}
+					<form method="POST">
+						<button formaction="/logout" type="submit" class="btn btn-primary btn-sm  shadow-lg"
+							>Logout</button
+						>
+					</form>
+
+					<div
+						class="dropdown-end dropdown avatar rounded-full border-2 border-neutral-content bg-base-200 drop-shadow-lg focus:bg-base-100"
 					>
-						<li><a href="/">Profile</a></li>
-						<li><a href="/">Settings</a></li>
-						<li><a href="/">Account</a></li>
-						<li><div class="divider m-0 p-0" /></li>
-						<li>
-							<a href="/" on:keyup>Logout</a>
-							<!-- on:click={() => auth.signOut()} -->
-						</li>
-					</ul>
-				</div>
+						<div tabindex="-1" class="w-10 rounded-full ">
+							<!-- <img src={$user?.photoURL} alt={$user?.displayName} /> -->
+							<!-- <img src="" alt=""> -->
+							<p>img</p>
+						</div>
+						<ul
+							tabindex="-1"
+							class=" dropdown-content menu rounded-box w-52 bg-base-100 p-2 text-neutral-content shadow"
+						>
+							<li><a href="/">Profile</a></li>
+							<li><a href="/">Settings</a></li>
+							<li><a href="/">Account</a></li>
+							<li><div class="divider m-0 p-0" /></li>
+							<li>
+								<a href="/" on:keyup>Logout</a>
+								<!-- on:click={() => auth.signOut()} -->
+							</li>
+						</ul>
+					</div>
+				{:else}
+					<a href="/login" class="btn btn-primary btn-sm shadow-lg">Login</a>
+					<a href="/register" class="btn btn-primary btn-sm shadow-lg">Register</a>
+				{/if}
 			</div>
 		</nav>
 
 		{#if open}
-			<!-- on:click_outside={handleClickOutside} -->
-			<div use:clickOutside class="disclosure-panel  absolute" transition:slide>
+			<!-- this does not error in original -->
+			<div
+				use:clickOutside
+				on:click_outside={handleClickOutside}
+				class="disclosure-panel  absolute"
+				transition:slide
+			>
 				<ul class="link-list">
-					<a href="/import" on:click={toggleOpen}
-						><Icon icon="material-symbols:upload-rounded" /> Import</a
-					>
-					<a href="/events" on:click={toggleOpen}
-						><Icon icon="material-symbols:calendar-month" />Events</a
-					>
-					<a href="/organizations" on:click={toggleOpen}
-						><Icon icon="ic:outline-people-alt" />Organizations</a
-					>
-					<a href="/community" on:click={toggleOpen}
-						><Icon icon="fluent:people-community-28-filled" />Community</a
-					>
-					<a href="/news" on:click={toggleOpen}
-						><Icon icon="material-symbols:breaking-news-alt-1-outline" />News</a
-					>
-					<a href="/series" on:click={toggleOpen}><Icon icon="mdi:award" />Series</a>
+					<a href="/import" on:click={toggleOpen}>
+						<Icon icon="material-symbols:upload-rounded" /> Import
+					</a>
+					<a href="/events" on:click={toggleOpen}>
+						<Icon icon="material-symbols:calendar-month" /> Events
+					</a>
+					<a href="/organization" on:click={toggleOpen}>
+						<Icon icon="ic:outline-people-alt" /> Organizations
+					</a>
+					<a href="/community" on:click={toggleOpen}>
+						<Icon icon="fluent:people-community-28-filled" /> Community
+					</a>
+					<a href="/news" on:click={toggleOpen}>
+						<Icon icon="material-symbols:breaking-news-alt-1-outline" /> News
+					</a>
+					<a href="/series" on:click={toggleOpen}> <Icon icon="mdi:award" /> Series </a>
 				</ul>
 			</div>
 		{/if}
@@ -124,7 +137,6 @@
 	.disclosure-panel {
 		@apply bg-base-100 shadow-lg;
 		@apply border-base-300;
-		/* height: 80vmax; */
 		position: absolute;
 		z-index: 10;
 		padding-bottom: 3em;
@@ -135,12 +147,7 @@
 	}
 
 	.link-list > a {
-		@apply flex w-full gap-2 text-left;
-		display: flex;
-		gap: 2;
-		width: 100%;
-		/* padding: 1em; */
-		border-radius: 0.75em;
+		@apply flex w-full gap-2 items-center px-4 py-2 text-left text-xl;
 	}
 
 	.link-list > a:hover {
