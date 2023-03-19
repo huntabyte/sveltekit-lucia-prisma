@@ -3,9 +3,15 @@ import { prisma } from '$lib/server/prisma'
 import { error, fail, redirect } from '@sveltejs/kit'
 
 export const load: PageServerLoad = async () => {
+	const getArticles = async () => {
+		const articles = await prisma.article.findMany({ include: { user: true } })
+		if (!articles) {
+			throw error(404, 'Articles not found')
+		}
+		return articles
+	}
 	return {
-		articles: await prisma.article.findMany({ include: { user: true } })
-		// comps: await prisma.competitor.findMany({ include: { User: true } })
+		articles: getArticles()
 	}
 }
 
@@ -23,16 +29,14 @@ export const actions: Actions = {
 
 		throw redirect(303, redirectTo ?? '/')
 	},
+
 	createArticle: async ({ request, locals }) => {
 		const { user, session } = await locals.validateUser()
 		if (!(user && session)) {
 			throw redirect(302, '/')
 		}
-
-		const { title, content } = Object.fromEntries(await request.formData()) as Record<
-			string,
-			string
-		>
+		const fd = await request.formData()
+		const { title, content } = Object.fromEntries(fd) as Record<string, string>
 
 		try {
 			await prisma.article.create({
@@ -51,6 +55,7 @@ export const actions: Actions = {
 			status: 201
 		}
 	},
+
 	deleteArticle: async ({ url, locals }) => {
 		const { user, session } = await locals.validateUser()
 		if (!(user && session)) {

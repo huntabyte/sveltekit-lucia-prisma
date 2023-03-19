@@ -4,9 +4,9 @@
 	import Icon from '@iconify/svelte'
 	import { clickOutside } from '$lib/utils'
 	import SubNav from '$lib/components/layout/SubNav.svelte'
+	import { afterNavigate } from '$app/navigation'
 
 	export let data
-	console.log('data: ', data)
 
 	let open = false
 	function handleClickOutside() {
@@ -24,30 +24,24 @@
 			<div class="user-nav">
 				<!-- <SignOut /> -->
 				{#if data.user}
-					<form method="POST">
-						<button formaction="/logout" type="submit" class="btn btn-primary btn-sm  shadow-lg"
-							>Logout</button
-						>
-					</form>
-
 					<div
 						class="dropdown-end dropdown avatar rounded-full border-2 border-neutral-content bg-base-200 drop-shadow-lg focus:bg-base-100"
 					>
 						<div tabindex="-1" class="w-10 rounded-full ">
-							<!-- <img src={$user?.photoURL} alt={$user?.displayName} /> -->
-							<!-- <img src="" alt=""> -->
-							<p>img</p>
+							<img src={data.user?.avatar} alt={data.user?.name} />
 						</div>
 						<ul
 							tabindex="-1"
-							class=" dropdown-content menu rounded-box w-52 bg-base-100 p-2 text-neutral-content shadow"
+							class=" dropdown-content menu rounded-box w-52 bg-base-100 p-2 text-base-content drop-shadow-lg"
 						>
-							<li><a href="/">Profile</a></li>
-							<li><a href="/">Settings</a></li>
-							<li><a href="/">Account</a></li>
+							<li><a href="/profile">Profile</a></li>
+							<li><a href="/settings">Settings</a></li>
+							<li><a href="/account">Account</a></li>
 							<li><div class="divider m-0 p-0" /></li>
 							<li>
-								<a href="/" on:keyup>Logout</a>
+								<form method="POST">
+									<button formaction="/logout" type="submit">Logout</button>
+								</form>
 								<!-- on:click={() => auth.signOut()} -->
 							</li>
 						</ul>
@@ -89,10 +83,7 @@
 		{/if}
 	</div>
 	<main>
-		<SubNav />
-		<div class="my-36">
-			<slot />
-		</div>
+		<slot />
 	</main>
 
 	<footer class="shadow">
@@ -137,11 +128,10 @@
 	.disclosure-panel {
 		@apply bg-base-100 shadow-lg;
 		@apply border-base-300;
-		position: absolute;
 		z-index: 10;
 		padding-bottom: 3em;
 		padding-top: 0.25em;
-		width: 22ch;
+		padding-right: 0.5em;
 		border-right-width: 0.25em;
 		border-bottom-right-radius: 3em;
 	}

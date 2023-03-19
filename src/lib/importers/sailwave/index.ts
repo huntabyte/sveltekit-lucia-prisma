@@ -14,14 +14,20 @@ declare global {
 }
 
 export const Populate = async ({ data, userId, file, orgId }) => {
+	// so upsert is easy but this doesn't make sense.
+	// people will either be creating, updating or overwritting
+	// ??????? could have Duplicate problems by using this method
+	// also cuurently not supporting updating at all
+
 	// no file so exit
 	if (!data) throw error(400, { message: 'Populate function requires data' })
 
 	// Make new Blw class
 	const blw = new Blw({ data, file })
-
+	// console.log('data: ', data)
 	function upsertObj() {
 		const event = blw.getEvent()
+		console.log('event: ', event)
 		const { eventeid } = event
 		const upObj = {
 			...event,

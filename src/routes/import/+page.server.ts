@@ -23,51 +23,35 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 export const actions: Actions = {
 	default: async (input) => {
-		// console.log('input: ', await input.locals.validate())
 		const { request, locals, params, cookies } = input
 		const fd = await request.formData()
-		const formData: any = Object.fromEntries(fd)
-		// console.log('formData: ', formData)
-		const { file, org } = formData
-		// console.log('file: ', file)
+		// console.log('fd: ', fd)
+		const { org, file }: any = Object.fromEntries(fd)
+
+		//  TODO:
+		// Impement multiple file upload
+		// just to make this an inteartive function here
+		//
+		// console.log('fd: ', fd.getAll('file'))
+
+		// const { file, org } = formData
+
+		// fd.getAll('file').forEach(async (file: any) => {
+		// 	console.log('file: ', file)
 		const texted = await file.text()
 		const parsed = parse(texted, {
 			complete: async (results) => {
+				// console.log('complete: ', 'complete')
 				const uid = await input.locals.validate()
-				// console.log('results.data: ', results.data)
 				Populate({ data: results.data, userId: uid?.userId, file: file, orgId: org })
-				// return results.data
 			},
 			error: (status, err) => {
 				// TODO
 				console.log('error: ', status, err)
 			}
 		})
-		// console.log('parsed: ', parsed)
-
-		// nodeFile.pipe(parsed)
-
-		// let data: any[] = []
-		// parsed.on('data', (chunk) => {
-		// 	data.push(chunk)
 		// })
 
-		// parsed.on('finish', () => {
-		// 	console.log(data)
-		// 	console.log(data.length)
-		// })
-		// const pop = Populate({ file: nodeFile, userId: 'uid' })
-		// Need to format path for file
-		// console.log('workingDir: ', process.cwd())
-		// const response = await fetch('/api/import', {
-		// 	method: 'POST',
-		// 	body: JSON.stringify(formData),
-		// 	headers: {
-		// 		'content-type': 'application/json'
-		// 	}
-		// })
-		// }
-		// get the file
-		// use blw.ts to get csv data
+		return { status: 201 }
 	}
 }

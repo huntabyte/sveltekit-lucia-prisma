@@ -150,6 +150,8 @@ model User {
     id           String         @id @unique
     name         String
     username     String         @unique
+    email        String?        @unique
+    avatar       String?
     session      Session[]
     Key          Key[]
     Article      Article[]
@@ -158,8 +160,32 @@ model User {
     Organization Organization[]
     Comp         Comp[]
     Venue        Venue[]
+    UserSettings UserSettings?
 
     @@map("user")
+}
+
+model UserSettings {
+    id       String  @id @unique @default(cuid())
+    theme    String?
+    language Lang?   @default(english)
+    user     User?   @relation(fields: [userId], references: [id])
+    userId   String? @unique
+}
+
+enum Lang {
+    english
+    french
+    spanish
+    german
+    dutch
+    swedish
+    russian
+    chinese
+    japanese
+    norweigen
+    italian
+    portugese
 }
 
 model Session {

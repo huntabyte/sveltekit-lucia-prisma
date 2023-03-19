@@ -1,4 +1,5 @@
-import type { LayoutServerLoad } from "./$types"
+import { afterNavigate } from '$app/navigation'
+import type { LayoutServerLoad } from './$types'
 
 export const load: LayoutServerLoad = async ({ locals }) => {
 	const { user, session } = await locals.validateUser()

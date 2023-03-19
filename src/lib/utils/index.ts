@@ -1,6 +1,14 @@
-export const svelog = (item: any, title?: string) => {
+export function svelog(item: any, title?: string) {
 	console.log(`${title ? title : 'svelog'}: `, item)
 	return ''
+}
+
+export function capitalizeFirstLetter(string: string) {
+	return string.charAt(0).toUpperCase() + string.slice(1)
+}
+
+export const serializeNonPOJOs = (value: object | null) => {
+	return structuredClone(value)
 }
 
 /** Dispatch event on click outside of node */

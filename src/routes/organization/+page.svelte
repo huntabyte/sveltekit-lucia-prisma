@@ -11,7 +11,7 @@
 	}
 </script>
 
-<Page>
+<Page title="Your Organizations">
 	<!-- // @ts-ignore -->
 	{#each data.orgs as org}
 		<ItemCard title={org.name}>

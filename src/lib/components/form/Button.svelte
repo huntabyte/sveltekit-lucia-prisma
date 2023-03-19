@@ -3,17 +3,21 @@
 	export let position: string | undefined = undefined
 	export let clazz
 	export { clazz as class }
+	// refactor this to use $$rest_props or even $$props
 </script>
 
 {#if position === 'float'}
 	<button
 		{type}
-		class={`btn btn-primary mt-4 shadow-lg px-10 rounded-full fixed bottom-4 right-4 ${clazz}`}
+		class={`btn btn-primary mt-4 shadow-lg px-10 rounded-full fixed bottom-14 right-8 ${clazz}`}
 	>
 		<slot />
 	</button>
 {:else}
-	<button {type} class={`btn btn-primary mt-4 shadow-lg px-10 w-full max-w-md ${clazz}`}>
+	<button
+		{type}
+		class={`btn btn-primary mt-4 shadow-lg px-10 w-full max-w-md rounded-br-3xl ${clazz}`}
+	>
 		<slot />
 	</button>
 {/if}

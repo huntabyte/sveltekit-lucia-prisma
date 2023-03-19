@@ -3,8 +3,13 @@ import { prisma } from '$lib/server/prisma'
 
 import type { Organization } from '@prisma/client'
 import type { Actions, PageServerLoad } from './$types'
+import { goto, afterNavigate } from '$app/navigation'
+import { redirect } from '@sveltejs/kit'
 
-export const load = (async ({ params }) => {
+export const load = (async ({ params, url }) => {
+	// console.log('request: ', request)
+	const from = url.searchParams.get('from')
+	console.log('from: ', from)
 	if (params.orgId === 'new') return { org: { name: 'New Organization' } as Organization }
 	const org = prisma.organization.findFirst({ where: { id: params.orgId } })
 	return {
@@ -28,8 +33,8 @@ const orgValidation = z.object({
 })
 
 export const actions: Actions = {
-	default: async ({ request, locals, params }) => {
-		console.log('params: ', params)
+	default: async ({ request, locals, params, url }) => {
+		// console.log('params: ', params)
 		const formData = Object.fromEntries(await request.formData()) as Record<string, string>
 		const uid: any = await locals.validate()
 
@@ -57,5 +62,8 @@ export const actions: Actions = {
 				errors
 			}
 		}
+		const from = url.searchParams.get('from')
+		console.log('from: ', from)
+		// throw redirect(300, `/${from}`)
 	}
 }

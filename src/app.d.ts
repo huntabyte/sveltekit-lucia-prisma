@@ -19,6 +19,13 @@ declare global {
 		type UserAttributes = {
 			username: string
 			name: string
+			email: string
+			avatar?: string
+		}
+	}
+	declare namespace svelte.JSX {
+		interface HTMLProps<T> {
+			click_outside: () => void
 		}
 	}
 }

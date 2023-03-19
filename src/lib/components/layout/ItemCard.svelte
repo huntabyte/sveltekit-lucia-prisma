@@ -11,14 +11,13 @@
 	}
 </script>
 
-<!-- <Page> -->
 <div class="item-card mb-4 snap-center" in:fade={{ duration: 1000 }} out:fade={{ duration: 750 }}>
 	<header on:click on:keyup>
 		<div class:smaller={title.length >= 28}>
 			{@html title}
 		</div>
 		<div class="mr-5 flex pt-1">
-			<slot name="right-top" />
+			<slot name="top-right" />
 		</div>
 	</header>
 	<div class="divider " />

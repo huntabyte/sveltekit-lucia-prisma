@@ -2,7 +2,7 @@
 	// import { subtitle } from '$lib/stores/stores';
 	import { onDestroy } from 'svelte'
 	import Icon from '@iconify/svelte'
-	let title
+	export let title
 	// let unsubscribe = subtitle.subscribe((val) => {
 	//   title = val;
 	// });

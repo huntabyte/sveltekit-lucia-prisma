@@ -3,11 +3,13 @@
 	import Button from '$lib/components/form/Button.svelte'
 	import Page from '$lib/components/layout/Page.svelte'
 	export let data
+	$: ({ orgs } = data)
 </script>
 
-<Page>
+<Page title="Import from File">
 	<form method="POST" enctype="multipart/form-data">
 		<label for="file" class="label">Sailwave File</label>
+		<!-- multiple -->
 		<input
 			type="file"
 			name="file"
@@ -16,8 +18,8 @@
 		<label for="org" class="label">Orgainzation</label>
 		<div class="flex gap-4 items-center  w-full max-w-md">
 			<select name="org" class="select select-bordered">
-				{#if data.orgs}
-					{#each data.orgs as org}
+				{#if orgs}
+					{#each orgs as org}
 						<option value={org.id}>{org.name}</option>
 					{/each}
 				{:else}
@@ -25,9 +27,11 @@
 				{/if}
 				<option>None</option>
 			</select>
-			<a href="/organization/edit/new" class="btn btn-primary btn-circle btn-sm">
-				<Icon class="text-3xl" icon="ic:baseline-add" />
-			</a>
+			<div class="tooltip tooltip-bottom-right" data-tip="Add Organization">
+				<a href="/organization/edit/new?from=import" class="btn btn-primary btn-circle btn-sm">
+					<Icon class="text-3xl" icon="ic:baseline-add" />
+				</a>
+			</div>
 		</div>
 		<Button class="mt-6 mb-8">Import</Button>
 	</form>
@@ -47,3 +51,42 @@
 		</div>
 	{/each}
 </Page>
+
+<style>
+	input[type='file']::file-selector-button {
+		border: none;
+		border-top-right-radius: 2em;
+		transition: 1s;
+	}
+
+	.tooltip-bottom-right:before {
+		transform: translate(-20%);
+		top: var(--tooltip-offset);
+		left: 50%;
+		right: auto;
+		bottom: auto;
+	}
+	.tooltip-bottom-right:after {
+		transform: translateX(-50%);
+		border-color: transparent transparent var(--tooltip-color) transparent;
+		top: var(--tooltip-tail-offset);
+		left: 50%;
+		right: auto;
+		bottom: auto;
+	}
+	/* .tooltip-bottom-left:before {
+		transform: translate(-80%);
+		top: var(--tooltip-offset);
+		left: 50%;
+		right: auto;
+		bottom: auto;
+	}
+	.tooltip-bottom-left:after {
+		transform: translateX(-50%);
+		border-color: transparent transparent var(--tooltip-color) transparent;
+		top: var(--tooltip-tail-offset);
+		left: 50%;
+		right: auto;
+		bottom: auto;
+	} */
+</style>

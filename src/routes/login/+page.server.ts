@@ -1,5 +1,6 @@
 import { auth } from '$lib/server/lucia'
 import { prisma } from '$lib/server/prisma'
+import { serializeNonPOJOs } from '$lib/utils'
 import { fail, redirect } from '@sveltejs/kit'
 import type { Actions, PageServerLoad } from './$types'
 
@@ -37,7 +38,7 @@ export const actions: Actions = {
 			const { password, ...rest } = formData
 			return {
 				data: rest,
-				errors: err
+				errors: serializeNonPOJOs(err)
 			}
 		}
 		throw redirect(302, '/')
