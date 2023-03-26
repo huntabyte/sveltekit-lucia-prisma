@@ -21,6 +21,7 @@ datasource db {
 model Series {
     id             String        @id @unique @default(cuid())
     name           String
+    description    String?
     rest           Json?
     organizationId String?
     Org            Organization? @relation(fields: [organizationId], references: [id])
@@ -38,6 +39,8 @@ model Event {
     name           String
     eventwebsite   String?
     venueName      String?
+    description    String?
+    titleImage     String?
     public         Boolean?      @default(true)
     fileInfo       Json?
     rest           Json?
@@ -69,8 +72,13 @@ model Race {
     Results   Result[]
     eventId   String?
     Event     Event?    @relation(fields: [eventId], references: [id])
+    // publisherId String?
+    // Publisher   User?     @relation(fields: [userId], references: [id])
+    // Editors     User[] 
     createdAt DateTime? @default(now())
     updatedAt DateTime? @updatedAt
+    userId    String?
+    User      User?     @relation(fields: [userId], references: [id])
 }
 
 model Comp {
@@ -124,6 +132,7 @@ model Organization {
     website     String?
     email       String?
     contact     Json?
+    titleImage  String?
     ownerId     String?
     Owner       User?     @relation(fields: [ownerId], references: [id])
     Series      Series[]
@@ -161,6 +170,7 @@ model User {
     Comp         Comp[]
     Venue        Venue[]
     UserSettings UserSettings?
+    Race         Race[]
 
     @@map("user")
 }

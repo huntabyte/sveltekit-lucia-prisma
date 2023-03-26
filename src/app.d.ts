@@ -24,8 +24,8 @@ declare global {
 		}
 	}
 	declare namespace svelte.JSX {
-		interface HTMLProps<T> {
-			click_outside: () => void
+		interface HTMLAttributes<T> {
+			onclick_outside: () => void
 		}
 	}
 }

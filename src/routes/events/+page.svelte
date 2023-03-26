@@ -9,7 +9,7 @@
 
 <Page title="Your Events">
 	{#each data.events as event}
-		<ItemCard title={event.name}>
+		<ItemCard title={event.name} href="/events/{event.id}">
 			<div slot="top-right">top right</div>
 			<div slot="bottom-right">bottom</div>
 			<a

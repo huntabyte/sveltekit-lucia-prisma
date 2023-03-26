@@ -1,27 +1,18 @@
 <script lang="ts">
-	import type { PageData } from './$types'
-
+	import type { ActionData, PageData } from './$types'
+	import Page from '$lib/components/layout/Page.svelte'
+	import Button from '$lib/components/form/Button.svelte'
+	import Input from '$lib/components/form/Input.svelte'
+	import Textarea from '$lib/components/form/Textarea.svelte'
 	export let data: PageData
+	export let form: ActionData
 	$: ({ article } = data)
 </script>
 
-<form action="?/updateArticle" method="POST">
-	<h3>Editing: <span class="text-sm ml-4">{article.title}</span></h3>
-	<label for="title" class="label"> Title </label>
-	<input
-		type="text"
-		id="title"
-		name="title"
-		class="input input-bordered w-full max-w-xs"
-		value={article.title}
-	/>
-	<label for="title" class="label"> Title </label>
-	<textarea
-		id="content"
-		name="content"
-		rows={5}
-		class="textarea textarea-bordered w-full max-w-xs"
-		value={article.content}
-	/>
-	<button type="submit" class="btn btn-primary block mt-2  w-full max-w-xs ">Update Article</button>
-</form>
+<Page title="Edit Article">
+	<form action="?/updateArticle" method="post">
+		<Input name="title" value={article.title} {form} />
+		<Textarea name="content" rows={5} value={article.content} {form} />
+		<Button>Update Article</Button>
+	</form>
+</Page>

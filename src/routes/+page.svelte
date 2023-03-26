@@ -6,12 +6,12 @@
 	$: ({ articles, user } = data)
 </script>
 
-<Page className="flex flex-col gap-4 pr-4">
+<Page className="flex flex-col gap-4 pr-4" title="Articles">
 	<h2 class="font-medium text-xl ">Articles:</h2>
 	{#each articles as article}
-		<article class=" rounded-xl my-2 border border-base-300">
+		<article class=" rounded-xl my-2 border border-base-300 bg-base-100">
 			<header class="text-lg font-medium bg-base-200 rounded-t-xl  p-2">{article.title}</header>
-			<p class="m-4">
+			<p class="m-4 ">
 				{@html article.content}
 			</p>
 			<!-- {console.log(article)} -->

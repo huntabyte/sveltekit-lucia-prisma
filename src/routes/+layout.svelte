@@ -1,10 +1,12 @@
 <script lang="ts">
 	import '../app.css'
+	import type { SubmitFunction } from '@sveltejs/kit'
 	import { slide } from 'svelte/transition'
 	import Icon from '@iconify/svelte'
 	import { clickOutside } from '$lib/utils'
-	import SubNav from '$lib/components/layout/SubNav.svelte'
-	import { afterNavigate } from '$app/navigation'
+	import { enhance } from '$app/forms'
+	import { themes } from '$lib/utils'
+	import { page } from '$app/stores'
 
 	export let data
 
@@ -13,14 +15,40 @@
 		open = false
 	}
 	const toggleOpen = () => (open = !open)
+
+	const submitUpdateTheme: SubmitFunction = ({ action }) => {
+		const theme = action.searchParams.get('theme')
+		if (theme) {
+			document.documentElement.setAttribute('data-theme', theme)
+		}
+	}
 </script>
 
 <div class="max-w-sm">
 	<div class="fixed top-0 z-20  w-full ">
-		<nav class="navbar border-base-300 text-secondary-content  ">
+		<nav class="navbar border-base-300 text-secondary-content ">
 			<button on:click={toggleOpen} class="btn-ghost btn hover:bg-transparent">
 				<Icon class="text-3xl text-base-300" icon="ci:hamburger-lg" />
 			</button>
+
+			<div class="flex-none">
+				<ul class="menu menu-horizontal px-1 z-50 w-40">
+					<li>
+						<button>set the theme here</button>
+						<ul class="p-2 bg-base-100 text-base-content w-full max-h-96 overflow-y-scroll">
+							<form method="POST" use:enhance={submitUpdateTheme}>
+								{#each themes as theme}
+									<li>
+										<button formaction="/?/setTheme&theme={theme}&redirectTo={$page.url.pathname}"
+											>{theme}</button
+										>
+									</li>
+								{/each}
+							</form>
+						</ul>
+					</li>
+				</ul>
+			</div>
 			<div class="user-nav">
 				<!-- <SignOut /> -->
 				{#if data.user}
@@ -68,7 +96,7 @@
 					<a href="/events" on:click={toggleOpen}>
 						<Icon icon="material-symbols:calendar-month" /> Events
 					</a>
-					<a href="/organization" on:click={toggleOpen}>
+					<a href="/organization/all" on:click={toggleOpen}>
 						<Icon icon="ic:outline-people-alt" /> Organizations
 					</a>
 					<a href="/community" on:click={toggleOpen}>

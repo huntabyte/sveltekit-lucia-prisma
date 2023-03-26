@@ -16,7 +16,7 @@
 {:else}
 	<button
 		{type}
-		class={`btn btn-primary mt-4 shadow-lg px-10 w-full max-w-md rounded-br-3xl ${clazz}`}
+		class={`btn btn-primary mt-4 shadow-lg px-10 w-full max-w-lg rounded-br-3xl ${clazz}`}
 	>
 		<slot />
 	</button>

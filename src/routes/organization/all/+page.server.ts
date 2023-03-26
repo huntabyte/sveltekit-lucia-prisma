@@ -1,6 +1,6 @@
 import { prisma } from '$lib/server/prisma'
 import { fail } from '@sveltejs/kit'
-import type { Actions, PageServerLoad } from './$types'
+import type { Actions, PageServerLoad } from '../$types'
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const user = locals.validateUser()

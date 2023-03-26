@@ -27,7 +27,7 @@ export const Populate = async ({ data, userId, file, orgId }) => {
 	// console.log('data: ', data)
 	function upsertObj() {
 		const event = blw.getEvent()
-		console.log('event: ', event)
+		// console.log('event: ', event)c
 		const { eventeid } = event
 		const upObj = {
 			...event,

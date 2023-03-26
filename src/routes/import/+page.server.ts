@@ -25,7 +25,7 @@ export const actions: Actions = {
 	default: async (input) => {
 		const { request, locals, params, cookies } = input
 		const fd = await request.formData()
-		// console.log('fd: ', fd)
+
 		const { org, file }: any = Object.fromEntries(fd)
 
 		//  TODO:
@@ -47,7 +47,7 @@ export const actions: Actions = {
 			},
 			error: (status, err) => {
 				// TODO
-				console.log('error: ', status, err)
+				console.log('import error: ', status, err)
 			}
 		})
 		// })
