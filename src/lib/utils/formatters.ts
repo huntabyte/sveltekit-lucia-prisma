@@ -49,6 +49,16 @@ export function formatRelativeDate(toDate, fromDate: any = new Date()) {
 // function isValidDate(d) {
 //   return d instanceof Date && !isNaN(d);
 // }
+export const formatDateTime = (date: Date) => {
+	try {
+		return new Intl.DateTimeFormat(undefined, {
+			dateStyle: 'short',
+			timeStyle: 'short'
+		}).format(date)
+	} catch (error) {
+		console.error('error: ', error)
+	}
+}
 
 export const formatDate = (date: string) => {
 	// this Obviously has holes in its theroy

@@ -16,6 +16,7 @@
 		"again": " npx prisma migrate dev --name again"
 	},
 	"devDependencies": {
+		"@faker-js/faker": "^7.6.0",
 		"@iconify/svelte": "^3.1.0",
 		"@playwright/test": "^1.30.0",
 		"@sveltejs/adapter-auto": "^1.0.2",
@@ -48,6 +49,7 @@
 		"@lucia-auth/sveltekit": "^0.6.2",
 		"@paralleldrive/cuid2": "^2.2.0",
 		"@prisma/client": "^4.11.0",
+		"@tanstack/svelte-table": "^8.8.5",
 		"daisyui": "^2.50.2",
 		"lucia-auth": "^0.6.0",
 		"papaparse": "^5.3.2",

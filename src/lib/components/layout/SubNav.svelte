@@ -4,7 +4,7 @@
 
 <div class="sub-nav">
 	<div class="flex h-full items-center">
-		<div class="text-3xl font-semibold">{@html title}</div>
+		<div class="text-3xl font-semibold select-none">{@html title}</div>
 	</div>
 </div>
 

@@ -39,9 +39,8 @@ export const actions: Actions = {
 		// fd.getAll('file').forEach(async (file: any) => {
 		// 	console.log('file: ', file)
 		const texted = await file.text()
-		const parsed = parse(texted, {
+		parse(texted, {
 			complete: async (results) => {
-				// console.log('complete: ', 'complete')
 				const uid = await input.locals.validate()
 				Populate({ data: results.data, userId: uid?.userId, file: file, orgId: org })
 			},

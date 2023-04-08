@@ -5,6 +5,7 @@ CREATE TYPE "Lang" AS ENUM ('english', 'french', 'spanish', 'german', 'dutch', '
 CREATE TABLE "Series" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "description" TEXT,
     "rest" JSONB,
     "organizationId" TEXT,
     "publisherId" TEXT,
@@ -18,9 +19,12 @@ CREATE TABLE "Series" (
 CREATE TABLE "Event" (
     "id" TEXT NOT NULL,
     "eventeid" TEXT NOT NULL,
+    "uniqueIdString" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "eventwebsite" TEXT,
     "venueName" TEXT,
+    "description" TEXT,
+    "titleImage" TEXT,
     "public" BOOLEAN DEFAULT true,
     "fileInfo" JSONB,
     "rest" JSONB,
@@ -46,6 +50,7 @@ CREATE TABLE "Race" (
     "sailed" TEXT,
     "rest" JSONB,
     "eventId" TEXT,
+    "publisherId" TEXT,
     "createdAt" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3),
 
@@ -55,10 +60,11 @@ CREATE TABLE "Race" (
 -- CreateTable
 CREATE TABLE "Comp" (
     "id" TEXT NOT NULL,
-    "compId" TEXT,
+    "compId" TEXT NOT NULL,
     "boat" TEXT,
     "skipper" TEXT,
     "fleet" TEXT,
+    "division" TEXT,
     "club" TEXT,
     "rest" JSONB,
     "publisherId" TEXT,
@@ -85,6 +91,7 @@ CREATE TABLE "Result" (
     "rewin" TEXT,
     "rrwin" TEXT,
     "rrset" TEXT,
+    "publisherId" TEXT NOT NULL,
     "eventId" TEXT,
     "compId" TEXT,
     "raceId" TEXT,
@@ -103,6 +110,7 @@ CREATE TABLE "Organization" (
     "website" TEXT,
     "email" TEXT,
     "contact" JSONB,
+    "titleImage" TEXT,
     "ownerId" TEXT,
     "createdAt" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3),
@@ -129,6 +137,8 @@ CREATE TABLE "user" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "username" TEXT NOT NULL,
+    "email" TEXT,
+    "avatar" TEXT,
 
     CONSTRAINT "user_pkey" PRIMARY KEY ("id")
 );
@@ -192,16 +202,25 @@ CREATE TABLE "_EventToSeries" (
 CREATE UNIQUE INDEX "Series_id_key" ON "Series"("id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Event_eventeid_key" ON "Event"("eventeid");
+CREATE UNIQUE INDEX "Event_uniqueIdString_key" ON "Event"("uniqueIdString");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Race_id_key" ON "Race"("id");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Race_raceId_key" ON "Race"("raceId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Comp_compId_key" ON "Comp"("compId");
 
 -- CreateIndex
+CREATE INDEX "Comp_compId_eventId_idx" ON "Comp"("compId", "eventId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Result_id_key" ON "Result"("id");
+
+-- CreateIndex
+CREATE INDEX "Result_raceId_idx" ON "Result"("raceId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Organization_name_key" ON "Organization"("name");
@@ -213,16 +232,13 @@ CREATE UNIQUE INDEX "Venue_id_key" ON "Venue"("id");
 CREATE UNIQUE INDEX "Venue_name_key" ON "Venue"("name");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Venue_website_key" ON "Venue"("website");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Venue_email_key" ON "Venue"("email");
-
--- CreateIndex
 CREATE UNIQUE INDEX "user_id_key" ON "user"("id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "user_username_key" ON "user"("username");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "user_email_key" ON "user"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "UserSettings_id_key" ON "UserSettings"("id");
@@ -276,10 +292,16 @@ ALTER TABLE "Event" ADD CONSTRAINT "Event_organizationId_fkey" FOREIGN KEY ("org
 ALTER TABLE "Race" ADD CONSTRAINT "Race_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "Event"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Race" ADD CONSTRAINT "Race_publisherId_fkey" FOREIGN KEY ("publisherId") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Comp" ADD CONSTRAINT "Comp_publisherId_fkey" FOREIGN KEY ("publisherId") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Comp" ADD CONSTRAINT "Comp_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "Event"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Result" ADD CONSTRAINT "Result_publisherId_fkey" FOREIGN KEY ("publisherId") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Result" ADD CONSTRAINT "Result_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "Event"("id") ON DELETE SET NULL ON UPDATE CASCADE;

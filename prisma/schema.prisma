@@ -5,7 +5,7 @@ generator client {
     provider = "prisma-client-js"
 }
 
-/// Always after the prisma-client-js generator
+// Always after the prisma-client-js generator
 generator json {
     provider  = "prisma-json-types-generator"
     namespace = "PrismaJson"
@@ -35,14 +35,19 @@ model Series {
 
 model Event {
     id             String        @id @default(cuid())
-    eventeid       String        @unique
+    eventeid       String
+    uniqueIdString String        @unique
     name           String
     eventwebsite   String?
     venueName      String?
     description    String?
     titleImage     String?
     public         Boolean?      @default(true)
+    /// [fileInfo]
     fileInfo       Json?
+    /// [resultColumns]
+    resultColumns  Json?
+    /// [eventRest]
     rest           Json?
     publisherId    String?
     Publisher      User?         @relation(fields: [publisherId], references: [id])
@@ -50,78 +55,92 @@ model Event {
     Venue          Venue?        @relation(fields: [venueId], references: [id])
     organizationId String?
     Organization   Organization? @relation(fields: [organizationId], references: [id])
-    Series         Series[]
-    Race           Race[]
-    Result         Result[]
-    Comp           Comp[]
+    // Series         Series[]
+    Races          Race[]
+    Results        Result[]
+    Comps          Comp[]
     createdAt      DateTime?     @default(now())
     updatedAt      DateTime?     @updatedAt
+    Series         Series?       @relation(fields: [seriesId], references: [id])
+    seriesId       String?
+    deleteMe       String?
 }
 
 model Race {
-    id        String    @id @unique @default(cuid())
-    raceId    String?
-    name      String?
-    starts    Json?
-    rank      String?
-    date      String?
-    time      String?
-    notes     String?
-    sailed    String?
-    rest      Json?
-    Results   Result[]
-    eventId   String?
-    Event     Event?    @relation(fields: [eventId], references: [id])
-    // publisherId String?
-    // Publisher   User?     @relation(fields: [userId], references: [id])
-    // Editors     User[] 
-    createdAt DateTime? @default(now())
-    updatedAt DateTime? @updatedAt
-    userId    String?
-    User      User?     @relation(fields: [userId], references: [id])
+    id            String    @id @unique @default(cuid())
+    raceId        String?   @unique
+    name          String?
+    starts        Json?
+    rank          String?
+    date          String?
+    time          String?
+    notes         String?
+    sailed        String?
+    resultColumns Json?
+    /// [raceRest]
+    rest          Json?
+    Event         Event?    @relation(fields: [eventId], references: [id])
+    eventId       String?
+    Publisher     User?     @relation(fields: [publisherId], references: [id])
+    publisherId   String?
+    Comps         Comp[]
+    Results       Result[]
+    createdAt     DateTime? @default(now())
+    updatedAt     DateTime? @updatedAt
+    // compId      String?
 }
 
 model Comp {
     id          String    @id @default(cuid())
-    compId      String?   @unique
+    compId      String    @unique
     boat        String?
     skipper     String?
     fleet       String?
+    division    String?
     club        String?
+    /// [compRest]
     rest        Json?
-    publisherId String?
     Publisher   User?     @relation(fields: [publisherId], references: [id])
-    eventId     String?
+    publisherId String?
     Event       Event?    @relation(fields: [eventId], references: [id])
-    Result      Result[]
+    eventId     String?
+    Results     Result[]
+    Races       Race[]
     createdAt   DateTime? @default(now())
     updatedAt   DateTime? @updatedAt
+
+    @@index([compId, eventId])
 }
 
 model Result {
-    id        String    @id @unique @default(cuid())
-    resultId  String?
-    finish    String?
-    start     String?
-    points    String?
-    position  String?
-    discard   String?
-    corrected String?
-    rrestyp   String?
-    elasped   String?
-    srat      String?
-    rewin     String?
-    rrwin     String?
-    rrset     String?
+    id          String    @id @unique @default(cuid())
+    resultId    String?
+    finish      String?
+    start       String?
+    // needs to be number
+    points      Int?
+    position    String?
+    discard     String?
+    corrected   String?
+    rrestyp     String?
+    elasped     String?
+    srat        String?
+    rewin       String?
+    rrwin       String?
+    rrset       String?
     // rest      Json?
-    eventId   String?
-    Event     Event?    @relation(fields: [eventId], references: [id])
-    compId    String?
-    Comp      Comp?     @relation(fields: [compId], references: [id])
-    raceId    String?
-    Race      Race?     @relation(fields: [raceId], references: [id])
-    createdAt DateTime? @default(now())
-    updatedAt DateTime? @updatedAt
+    Publisher   User      @relation(fields: [publisherId], references: [id])
+    publisherId String
+    Event       Event?    @relation(fields: [eventId], references: [id])
+    eventId     String?
+    Comp        Comp?     @relation(fields: [compId], references: [id])
+    compId      String?
+    Race        Race?     @relation(fields: [raceId], references: [id])
+    raceId      String?
+    createdAt   DateTime? @default(now())
+    updatedAt   DateTime? @updatedAt
+
+    @@index([raceId])
 }
 
 model Organization {
@@ -144,8 +163,8 @@ model Organization {
 model Venue {
     id          String    @id @unique @default(cuid())
     name        String    @unique
-    website     String?   @unique
-    email       String?   @unique
+    website     String?
+    email       String?
     burgee      String?
     publisherId String?
     Publisher   User?     @relation(fields: [publisherId], references: [id])
@@ -171,6 +190,7 @@ model User {
     Venue        Venue[]
     UserSettings UserSettings?
     Race         Race[]
+    Result       Result[]
 
     @@map("user")
 }

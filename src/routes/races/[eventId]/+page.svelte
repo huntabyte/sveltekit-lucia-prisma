@@ -33,12 +33,12 @@
 					<div slot="bottom-right" class="flex justify-end text-primary">
 						<div class="tooltip tooltip-top" data-tip="View Competitors">
 							<a href="/comps/{event?.id}" class="btn btn-ghost p-1">
-								<Icon icon="material-symbols:groups-outline-rounded" width="24" />
+								<Icon icon="material-symbols:groups-outline-rounded" width="30" />
 							</a>
 						</div>
 						<!-- Edit should only show when current user is owner -->
 						<div class="tooltip tooltip-top" data-tip="Race Edit">
-							<a href="/event/{event?.id}" class="btn btn-ghost p-1">
+							<a href="/event/{event?.id}" class="btn btn-ghost">
 								<Icon icon="material-symbols:edit-outline" width="24" />
 							</a>
 						</div>
@@ -56,9 +56,7 @@
 							{race.sailed === '1' ? 'Complete' : 'Un-Sailed'}
 						</div>
 						<div class="p-2 text-sm pr-6">
-							{race.date ? race.date : 'No date entered'} - {race.time
-								? race.time
-								: 'No time entered'}
+							{race.date ? race.date : 'TBA'} - {race.time ? race.time : ''}
 						</div>
 					</div>
 

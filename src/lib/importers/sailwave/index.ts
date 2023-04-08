@@ -2,18 +2,7 @@ import { prisma } from '$lib/server/prisma'
 import { error } from '@sveltejs/kit'
 import Blw from './Blw'
 
-declare global {
-	namespace PrismaJson {
-		// you can use classes, interfaces, types, etc.
-		type EventJson = {
-			venueemail: string
-			venuewebsite: string
-			venueburgee: string
-		}
-	}
-}
-
-export const Populate = async ({ data, userId, file, orgId }) => {
+export const Populate = ({ data, userId, file, orgId }) => {
 	// so upsert is easy but this doesn't make sense.
 	// people will either be creating, updating or overwritting
 	// ??????? could have Duplicate problems by using this method
@@ -24,13 +13,55 @@ export const Populate = async ({ data, userId, file, orgId }) => {
 
 	// Make new Blw class
 	const blw = new Blw({ data, file })
-	// console.log('data: ', data)
+	const event = blw.getEvent()
+	// console.log('event: ', event)
+	const { eventeid, uniqueIdString } = event
+
+	async function compsObj() {
+		// Comp: {
+		// 	create: blw.getComps().map((comp) => {
+		// 		// console.log('comp: ', comp)
+		// 		return {
+		// 			compId: comp.compId,
+		// 			boat: comp.boat,
+		// 			skipper: comp.helmname,
+		// 			fleet: comp.fleet,
+		// 			club: comp.club,
+		// 			division: comp.division,
+		// 			rest: comp,
+		// 			Publisher: {
+		// 				connect: { id: userId }
+		// 			}
+		// 		}
+		// 	})
+		// },
+		await blw.getComps().map(async (comp) => {
+			return await prisma.comp.upsert({
+				where: { compId: comp.compId },
+				update: {},
+				create: {
+					compId: comp.compId,
+					boat: comp.boat,
+					skipper: comp.helmname,
+					fleet: comp.fleet,
+					club: comp.club,
+					division: comp.division,
+					rest: comp,
+					Publisher: {
+						connect: { id: userId }
+					},
+					Event: {
+						connect: { uniqueIdString: uniqueIdString }
+					}
+				}
+			})
+		})
+	}
+
 	function upsertObj() {
-		const event = blw.getEvent()
-		// console.log('event: ', event)c
-		const { eventeid } = event
 		const upObj = {
 			...event,
+
 			Publisher: {
 				connect: { id: userId }
 			},
@@ -39,39 +70,62 @@ export const Populate = async ({ data, userId, file, orgId }) => {
 			},
 			Venue: {
 				connectOrCreate: {
-					where: { name: event.name },
+					where: { name: event.venueName },
 					create: {
 						name: event.venueName,
-						// @ts-ignore
 						email: event.rest.venueemail,
-						// @ts-ignore
 						website: event.rest.venuewebsite,
-						// @ts-ignore
 						burgee: event.rest.venueburgee
 					}
 				}
 			},
-			Comp: {
-				create: blw.getComps().map((comp) => {
-					return {
-						compId: comp.compId,
-						boat: comp.boat ?? '',
-						skipper: comp.helmname ?? '',
-						fleet: comp.fleet ?? '',
-						club: comp.club ?? '',
-						rest: comp
-						// Publisher: {
-						// 	connect: { id: userId }
-						// }
-					}
-				})
-			},
-			Race: {
+			// Comps: {
+			// 	create: blw.getComps().map((comp) => {
+			// 		// console.log('comp: ', comp)
+			// 		return {
+			// 			compId: comp.compId,
+			// 			boat: comp.boat,
+			// 			skipper: comp.helmname,
+			// 			fleet: comp.fleet,
+			// 			club: comp.club,
+			// 			division: comp.division,
+			// 			rest: comp,
+			// 			Publisher: {
+			// 				connect: { id: userId }
+			// 			}
+			// 		}
+			// 	})
+			// },
+			Races: {
 				create: blw.getRaces().map((race) => {
 					return {
 						...race,
+						Publisher: {
+							connect: { id: userId }
+						},
+						Comps: {
+							connectOrCreate: blw.getComps().map((comp) => {
+								// console.log('comp: ', comp)
+								return {
+									where: { compId: comp.compId },
+									create: {
+										compId: comp.compId,
+										boat: comp.boat,
+										skipper: comp.helmname,
+										fleet: comp.fleet,
+										club: comp.club,
+										division: comp.division,
+										rest: comp,
+										Publisher: {
+											connect: { id: userId }
+										}
+									}
+								}
+							})
+						},
 						Results: {
 							create: blw.getResults(race.raceId).map((result) => {
+								// console.log('result: ', result)
 								return {
 									resultId: result.resultId,
 									finish: result.finish,
@@ -82,11 +136,14 @@ export const Populate = async ({ data, userId, file, orgId }) => {
 									corrected: result.corrected,
 									rrestyp: result.rrestyp,
 									elasped: result.elasped,
-									Comp: {
-										connect: { compId: result.compId }
+									Publisher: {
+										connect: { id: userId }
 									},
 									Event: {
-										connect: { eventeid: event.eventeid }
+										connect: { uniqueIdString: event.uniqueIdString }
+									},
+									Comp: {
+										connect: { compId: result.compId }
 									}
 								}
 							})
@@ -96,9 +153,10 @@ export const Populate = async ({ data, userId, file, orgId }) => {
 			}
 		}
 		return {
-			where: { eventeid: eventeid },
-			update: {},
-			create: upObj
+			data: upObj
+			// where: { uniqueIdString: uniqueIdString },
+			// update: {},
+			// create: upObj
 		}
 	}
 
@@ -106,10 +164,10 @@ export const Populate = async ({ data, userId, file, orgId }) => {
 
 	async function addTables() {
 		try {
-			// console.log('upsertObj(): ', upsertObj())
-			await prisma.event.upsert(upsertObj())
+			// await prisma.event.upsert(upsertObj())
+			await prisma.event.create(upsertObj())
 		} catch (error: any) {
-			console.log('error: ', error.message)
+			console.log('Import Error: ', error.message)
 		}
 	}
 } // populate
