@@ -2,6 +2,23 @@ import { prisma } from '$lib/server/prisma'
 import { error } from '@sveltejs/kit'
 import Blw from './Blw'
 
+interface CreateEventProps {
+	data: any
+	userId: string
+	file: any
+	orgId: string
+}
+
+export function CheckForDuplicates({ data, userId, file, orgId }) {
+	//
+}
+
+export function CreateEvent({ data, userId, file, orgId }: CreateEventProps) {
+	// use prisma create here..
+	// but can we still connect??
+	// figure out a way to unique -ish comps
+}
+
 export const Populate = ({ data, userId, file, orgId }) => {
 	// so upsert is easy but this doesn't make sense.
 	// people will either be creating, updating or overwritting
@@ -16,47 +33,6 @@ export const Populate = ({ data, userId, file, orgId }) => {
 	const event = blw.getEvent()
 	// console.log('event: ', event)
 	const { eventeid, uniqueIdString } = event
-
-	async function compsObj() {
-		// Comp: {
-		// 	create: blw.getComps().map((comp) => {
-		// 		// console.log('comp: ', comp)
-		// 		return {
-		// 			compId: comp.compId,
-		// 			boat: comp.boat,
-		// 			skipper: comp.helmname,
-		// 			fleet: comp.fleet,
-		// 			club: comp.club,
-		// 			division: comp.division,
-		// 			rest: comp,
-		// 			Publisher: {
-		// 				connect: { id: userId }
-		// 			}
-		// 		}
-		// 	})
-		// },
-		await blw.getComps().map(async (comp) => {
-			return await prisma.comp.upsert({
-				where: { compId: comp.compId },
-				update: {},
-				create: {
-					compId: comp.compId,
-					boat: comp.boat,
-					skipper: comp.helmname,
-					fleet: comp.fleet,
-					club: comp.club,
-					division: comp.division,
-					rest: comp,
-					Publisher: {
-						connect: { id: userId }
-					},
-					Event: {
-						connect: { uniqueIdString: uniqueIdString }
-					}
-				}
-			})
-		})
-	}
 
 	function upsertObj() {
 		const upObj = {
@@ -79,23 +55,7 @@ export const Populate = ({ data, userId, file, orgId }) => {
 					}
 				}
 			},
-			// Comps: {
-			// 	create: blw.getComps().map((comp) => {
-			// 		// console.log('comp: ', comp)
-			// 		return {
-			// 			compId: comp.compId,
-			// 			boat: comp.boat,
-			// 			skipper: comp.helmname,
-			// 			fleet: comp.fleet,
-			// 			club: comp.club,
-			// 			division: comp.division,
-			// 			rest: comp,
-			// 			Publisher: {
-			// 				connect: { id: userId }
-			// 			}
-			// 		}
-			// 	})
-			// },
+
 			Races: {
 				create: blw.getRaces().map((race) => {
 					return {
@@ -110,11 +70,14 @@ export const Populate = ({ data, userId, file, orgId }) => {
 									where: { compId: comp.compId },
 									create: {
 										compId: comp.compId,
+										club: comp.club,
 										boat: comp.boat,
 										skipper: comp.helmname,
 										fleet: comp.fleet,
-										club: comp.club,
 										division: comp.division,
+										rank: comp.rank,
+										nett: comp.nett,
+										total: comp.total,
 										rest: comp,
 										Publisher: {
 											connect: { id: userId }
@@ -125,17 +88,20 @@ export const Populate = ({ data, userId, file, orgId }) => {
 						},
 						Results: {
 							create: blw.getResults(race.raceId).map((result) => {
-								// console.log('result: ', result)
+								//  Note convert to numbers
 								return {
 									resultId: result.resultId,
+									points: result.points,
 									finish: result.finish,
 									start: result.start,
-									points: result.points,
 									position: result.position,
 									discard: result.discard,
-									corrected: result.corrected,
-									rrestyp: result.rrestyp,
 									elasped: result.elasped,
+									corrected: result.corrected,
+									resultType: result.resultType,
+									elapsedWin: result.elapsedWin,
+									ratingWin: result.ratingWin,
+
 									Publisher: {
 										connect: { id: userId }
 									},

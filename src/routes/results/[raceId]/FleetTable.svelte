@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { writable } from 'svelte/store'
-	import Page from '$lib/components/layout/Page.svelte'
 	import {
 		createSvelteTable,
 		getCoreRowModel,
@@ -11,42 +10,30 @@
 		createColumnHelper,
 		type SortDirection
 	} from '@tanstack/svelte-table'
-	import { makeData, type Person } from './makeData'
 	import AscSort from './ascSort.svelte'
 	import DscSort from './dscSort.svelte'
 	import Empty from './empty.svelte'
+	import Centered from './centered.svelte'
 
 	// export let data
 	// export let fleetData
 	export let race
 	export let results
-
+	export let fleetName
+	// console.log('results: ', results)
 	const notypecheck = (x: any) => x
 
-	let columnVisibility = { corrected: false }
-	// $: ({ results, user } = data)
-	// console.log('data: ', data.results)
-	function getResultColumns() {
-		if (race?.Event?.resultColumns) {
-			// set event presets
-			setColumnVisibility(race?.Event?.resultColumns)
-			// this is just setColumn
-		}
-		if (race?.resultColumns) {
-			setColumnVisibility(race?.Event?.resultColumns)
-			// viewColumns = data.race?.resultColumns
-		}
-		return columnVisibility
-	}
+	let columnVisibility = { fleet: false }
 
-	// const view = getResultColumns()
-	$: columnVisibility = getResultColumns()
+	let resultRows = results.map((result) => {
+		// you cannot pass null on anything here
 
-	// console.log('view: ', view)
-
-	const resultRows = results?.map((result) => {
 		return {
-			points: +result.points, // convert to number
+			points: result.points, // convert to number
+			position: result.position,
+			rank: result.Comp?.rank ?? '',
+			total: result.Comp?.total ?? '',
+			nett: result.Comp?.nett ?? '',
 			finish: result.finish,
 			elapsed: result.elasped,
 			start: result.start,
@@ -57,10 +44,9 @@
 		}
 	})
 
-	// console.log('resultRows: ', resultRows)
-
 	type Result = {
-		points?: number
+		points?: string
+		rank?: string
 		boat?: string
 		skipper?: string
 		finish?: string
@@ -73,35 +59,54 @@
 	///////////////////////////////////////////////////////
 	const columns: ColumnDef<Result>[] = [
 		{
-			accessorKey: 'points',
-			header: 'Points',
-			cell: (info) => info.getValue()
-		},
-		{
-			accessorKey: 'position',
-
-			header: 'Position',
-			cell: (info) => info.getValue()
-		},
-		{
-			accessorKey: 'boat',
-			header: 'Boat',
-			cell: (info) => info.getValue()
-		},
-		{
-			accessorKey: 'skipper',
-			header: 'Skipper',
-			cell: (info) => info.getValue()
-		},
-		{
-			accessorKey: 'fleet',
-			header: 'Fleet',
-			cell: (info) => info.getValue()
-		},
-		{
-			accessorKey: 'corrected',
-			header: 'Corrected',
-			cell: (info) => (info.getValue() as number).toString()
+			header: `${fleetName}`,
+			columns: [
+				{
+					accessorKey: 'rank',
+					header: 'Rank',
+					cell: (info) => info.getValue()
+				},
+				{
+					accessorKey: 'points',
+					header: 'Points',
+					cell: (info) => flexRender(Centered, { info: info.getValue() })
+				},
+				{
+					accessorKey: 'position',
+					header: 'Place',
+					cell: (info) => info.getValue()
+				},
+				{
+					accessorKey: 'boat',
+					header: 'Boat',
+					cell: (info) => info.getValue()
+				},
+				{
+					accessorKey: 'skipper',
+					header: 'Skipper',
+					cell: (info) => info.getValue()
+				},
+				// {
+				// 	accessorKey: 'fleet',
+				// 	header: 'Fleet',
+				// 	cell: (info) => info.getValue()
+				// },
+				{
+					accessorKey: 'corrected',
+					header: 'Corrected',
+					cell: (info) => (info.getValue() as number).toString()
+				},
+				{
+					accessorKey: 'nett',
+					header: 'Nett',
+					cell: (info) => info.getValue()
+				},
+				{
+					accessorKey: 'total',
+					header: 'Total',
+					cell: (info) => info.getValue()
+				}
+			]
 		}
 	]
 	///////////////////////////////////////////////////////
@@ -137,21 +142,16 @@
 		onSortingChange: setSorting,
 		getCoreRowModel: getCoreRowModel(),
 		getSortedRowModel: getSortedRowModel(),
-		onColumnVisibilityChange: setColumnVisibility,
-		debugTable: true
+		onColumnVisibilityChange: setColumnVisibility
+		// debugTable: true
 	})
 
 	function setColumnVisibility(updater) {
-		// console.log('updater: ', updater)
 		if (updater instanceof Function) {
 			columnVisibility = updater(columnVisibility)
 		} else {
 			columnVisibility = updater
 		}
-		// console.log('columnVisibility: ', columnVisibility)
-		// TODO
-		// default visiblity could be set in event
-		// and maybe overide per race or user pref.
 
 		options.update((old) => ({
 			...old,
@@ -162,22 +162,51 @@
 		}))
 	}
 
+	function getResultColumns() {
+		// this is to set default column visibilty from database
+		if (race?.Event?.resultColumns) {
+			// set event presets
+			setColumnVisibility(race?.Event?.resultColumns)
+		}
+		if (race?.resultColumns) {
+			// overide with eace presets
+			setColumnVisibility(race?.Event?.resultColumns)
+		}
+		return columnVisibility
+	}
+
+	$: columnVisibility = getResultColumns()
+
 	const table = createSvelteTable(options)
 </script>
 
-<Page title="Results">
-	{#each $table.getAllLeafColumns() as column}
-		<div class="px-1">
-			<label>
-				<input
-					checked={column.getIsVisible()}
-					on:change={column.getToggleVisibilityHandler()}
-					type="checkbox"
-				/>{' '}
-				{column.id}
-			</label>
+<div class="my-8">
+	<div class="flex justify-between mb-4">
+		<h2>{fleetName}</h2>
+		<label for="my-modal-3" class="btn btn-active">view</label>
+
+		<!-- Put this part before </body> tag -->
+		<input type="checkbox" id="my-modal-3" class="modal-toggle" />
+		<div class="modal">
+			<div class="modal-box relative">
+				<label for="my-modal-3" class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+				<h3 class="text-lg font-bold">Choose View Options</h3>
+				{#each $table.getAllLeafColumns() as column}
+					<div class="px-1">
+						<label class="label">
+							<span class="label-text pr-1">{column.id.toLocaleUpperCase()}</span>
+							<input
+								type="checkbox"
+								class="checkbox checkbox-xs"
+								checked={column.getIsVisible()}
+								on:change={column.getToggleVisibilityHandler()}
+							/>
+						</label>
+					</div>
+				{/each}
+			</div>
 		</div>
-	{/each}
+	</div>
 	<table class="table table-zebra w-full mr-10">
 		<thead>
 			{#each $table.getHeaderGroups() as headerGroup}
@@ -238,4 +267,4 @@
 			{/each}
 		</tfoot>
 	</table>
-</Page>
+</div>

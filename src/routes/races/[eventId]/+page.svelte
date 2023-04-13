@@ -1,13 +1,11 @@
 <script lang="ts">
 	import ItemCard from '$lib/components/layout/ItemCard.svelte'
 	import Page from '$lib/components/layout/Page.svelte'
-	import { formatDate } from '$lib/utils/formatters'
 	import Icon from '@iconify/svelte'
 	import type { PageData } from './$types'
 
 	export let data: PageData
-	console.log('data: ', data)
-	$: ({ races, event } = data)
+	$: ({ races, event, user } = data)
 
 	const formatDateTime = (date: Date) => {
 		try {
@@ -37,11 +35,13 @@
 							</a>
 						</div>
 						<!-- Edit should only show when current user is owner -->
+						<!-- {#if user?.userId === event?.publisherId} -->
 						<div class="tooltip tooltip-top" data-tip="Race Edit">
 							<a href="/event/{event?.id}" class="btn btn-ghost">
 								<Icon icon="material-symbols:edit-outline" width="24" />
 							</a>
 						</div>
+						<!-- {/if} -->
 					</div>
 					<div>Notes:</div>
 					<div class="px-2 pb-4">

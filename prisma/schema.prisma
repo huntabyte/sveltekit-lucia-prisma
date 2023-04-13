@@ -31,6 +31,8 @@ model Series {
     Events         Event[]
     createdAt      DateTime?     @default(now())
     updatedAt      DateTime?     @updatedAt
+    follow         follow[]
+    like           like[]
 }
 
 model Event {
@@ -46,7 +48,7 @@ model Event {
     /// [fileInfo]
     fileInfo       Json?
     /// [resultColumns]
-    resultColumns  Json?
+    resultColumns  Json? // @default("{\"points\": false, \"nett\": false, \"total\": false, \"skipper\": false, \"place\": false}")
     /// [eventRest]
     rest           Json?
     publisherId    String?
@@ -63,7 +65,8 @@ model Event {
     updatedAt      DateTime?     @updatedAt
     Series         Series?       @relation(fields: [seriesId], references: [id])
     seriesId       String?
-    deleteMe       String?
+    follow         follow[]
+    like           like[]
 }
 
 model Race {
@@ -88,16 +91,22 @@ model Race {
     createdAt     DateTime? @default(now())
     updatedAt     DateTime? @updatedAt
     // compId      String?
+    follow        follow[]
+    like          like[]
 }
 
 model Comp {
     id          String    @id @default(cuid())
     compId      String    @unique
+    club        String?
     boat        String?
-    skipper     String?
+    skipper     String? // helmname
     fleet       String?
     division    String?
-    club        String?
+    rating      String?
+    rank        String?
+    nett        String?
+    total       String?
     /// [compRest]
     rest        Json?
     Publisher   User?     @relation(fields: [publisherId], references: [id])
@@ -108,37 +117,39 @@ model Comp {
     Races       Race[]
     createdAt   DateTime? @default(now())
     updatedAt   DateTime? @updatedAt
+    follow      follow[]
+    like        like[]
 
     @@index([compId, eventId])
 }
 
 model Result {
-    id          String    @id @unique @default(cuid())
-    resultId    String?
-    finish      String?
-    start       String?
+    id         String  @id @unique @default(cuid())
+    resultId   String?
+    finish     String?
+    start      String?
     // needs to be number
-    points      Int?
-    position    String?
-    discard     String?
-    corrected   String?
-    rrestyp     String?
-    elasped     String?
-    srat        String?
-    rewin       String?
-    rrwin       String?
-    rrset       String?
-    // rest      Json?
-    Publisher   User      @relation(fields: [publisherId], references: [id])
-    publisherId String
-    Event       Event?    @relation(fields: [eventId], references: [id])
-    eventId     String?
-    Comp        Comp?     @relation(fields: [compId], references: [id])
-    compId      String?
-    Race        Race?     @relation(fields: [raceId], references: [id])
-    raceId      String?
-    createdAt   DateTime? @default(now())
-    updatedAt   DateTime? @updatedAt
+    points     String?
+    position   String?
+    discard    String?
+    corrected  String?
+    resultType String?
+
+    elasped        String?
+    supposedRating String?
+    elapsedWin     String?
+    ratingWin      String?
+    rrset          String?
+    Publisher      User      @relation(fields: [publisherId], references: [id])
+    publisherId    String
+    Event          Event?    @relation(fields: [eventId], references: [id])
+    eventId        String?
+    Comp           Comp?     @relation(fields: [compId], references: [id])
+    compId         String?
+    Race           Race?     @relation(fields: [raceId], references: [id])
+    raceId         String?
+    createdAt      DateTime? @default(now())
+    updatedAt      DateTime? @updatedAt
 
     @@index([raceId])
 }
@@ -158,6 +169,46 @@ model Organization {
     Events      Event[]
     createdAt   DateTime? @default(now())
     updatedAt   DateTime? @updatedAt
+    follow      follow[]
+    like        like[]
+}
+
+model follow {
+    id             String        @id @unique @default(cuid())
+    User           User          @relation(fields: [userId], references: [id])
+    userId         String
+    type           String // series | event | race | comp | organization
+    Series         Series?       @relation(fields: [seriesId], references: [id])
+    seriesId       String?
+    Event          Event?        @relation(fields: [eventId], references: [id])
+    eventId        String?
+    Organization   Organization? @relation(fields: [organizationId], references: [id])
+    organizationId String?
+    Race           Race?         @relation(fields: [raceId], references: [id])
+    raceId         String?
+    Comp           Comp?         @relation(fields: [compId], references: [id])
+    compId         String?
+    updatedAt      DateTime      @updatedAt
+    createdAt      DateTime      @default(now())
+}
+
+model like {
+    id             String        @id @unique @default(cuid())
+    User           User          @relation(fields: [userId], references: [id])
+    userId         String
+    type           String // series | event | race | comp | organization
+    Series         Series?       @relation(fields: [seriesId], references: [id])
+    seriesId       String?
+    Event          Event?        @relation(fields: [eventId], references: [id])
+    eventId        String?
+    Organization   Organization? @relation(fields: [organizationId], references: [id])
+    organizationId String?
+    Race           Race?         @relation(fields: [raceId], references: [id])
+    raceId         String?
+    Comp           Comp?         @relation(fields: [compId], references: [id])
+    compId         String?
+    updatedAt      DateTime      @updatedAt
+    createdAt      DateTime      @default(now())
 }
 
 model Venue {
@@ -191,6 +242,8 @@ model User {
     UserSettings UserSettings?
     Race         Race[]
     Result       Result[]
+    follow       follow[]
+    like         like[]
 
     @@map("user")
 }

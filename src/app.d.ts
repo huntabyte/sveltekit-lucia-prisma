@@ -31,7 +31,7 @@ declare global {
 			eventburgee?: string
 		}
 
-		type resultColumns = {
+		export type resultColumns = {
 			boat: boolean
 			fleet: boolean
 			points: boolean

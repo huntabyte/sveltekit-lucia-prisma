@@ -1,229 +1,64 @@
 <script lang="ts">
-	import { writable } from 'svelte/store'
 	import Page from '$lib/components/layout/Page.svelte'
-	import {
-		createSvelteTable,
-		getCoreRowModel,
-		getSortedRowModel,
-		type ColumnDef,
-		type TableOptions,
-		flexRender,
-		createColumnHelper,
-		type SortDirection
-	} from '@tanstack/svelte-table'
-	import { makeData, type Person } from './makeData'
-	import AscSort from './ascSort.svelte'
-	import DscSort from './dscSort.svelte'
-	import Empty from './empty.svelte'
+	import { svelog } from '$lib/utils'
+	import type { Comp, Result } from '@prisma/client'
+	import type { PageData } from './$types'
+	import FleetTable from './FleetTable.svelte'
 
-	export let data
-	let columnVisibility = { corrected: false }
-	$: ({ results, user } = data)
+	export let data: PageData
 	// console.log('data: ', data.results)
-	function getResultColumns() {
-		if (data.race?.Event?.resultColumns) {
-			// set event presets
-			setColumnVisibility(data.race?.Event?.resultColumns)
-			// this is just setColumn
-		}
-		if (data.race?.resultColumns) {
-			setColumnVisibility(data.race?.Event?.resultColumns)
-			// viewColumns = data.race?.resultColumns
-		}
-		return columnVisibility
+	$: ({ race, results } = data)
+
+	// make an arrays filtered by a set from fleet
+
+	// first step is turn the unique fleets if any in this race into an array
+	function getUniqueFleetsArray() {
+		return [
+			...new Set(
+				data.results?.map((item) => {
+					if (item.Comp?.fleet) {
+						return item.Comp?.fleet
+					}
+					return item.Comp?.division
+				})
+			)
+		]
 	}
 
-	// const view = getResultColumns()
-	$: columnVisibility = getResultColumns()
-
-	// console.log('view: ', view)
-
-	const resultRows = data.results?.map((result) => {
-		return {
-			points: +result.points, // convert to number
-			finish: result.finish,
-			elapsed: result.elasped,
-			start: result.start,
-			corrected: result.corrected,
-			fleet: result.Comp?.fleet ?? result.Comp?.division,
-			boat: result.Comp?.boat,
-			skipper: result.Comp?.skipper ?? 'No skipper'
-		}
-	})
-
-	// console.log('resultRows: ', resultRows)
-
-	type Result = {
-		points?: number
-		boat?: string
-		skipper?: string
-		finish?: string
-		start?: string
-		elapsed?: string
-		corrected?: string
-		[key: string]: any
-	}
-
-	///////////////////////////////////////////////////////
-	const columns: ColumnDef<Result>[] = [
-		{
-			accessorKey: 'points',
-			header: 'Points',
-			cell: (info) => info.getValue()
-		},
-		{
-			accessorKey: 'position',
-
-			header: 'Position',
-			cell: (info) => info.getValue()
-		},
-		{
-			accessorKey: 'boat',
-			header: 'Boat',
-			cell: (info) => info.getValue()
-		},
-		{
-			accessorKey: 'skipper',
-			header: 'Skipper',
-			cell: (info) => info.getValue()
-		},
-		{
-			accessorKey: 'fleet',
-			header: 'Fleet',
-			cell: (info) => info.getValue()
-		},
-		{
-			accessorKey: 'corrected',
-			header: 'Corrected',
-			cell: (info) => (info.getValue() as number).toString()
-		}
-	]
-	///////////////////////////////////////////////////////
-
-	let sorting = []
-
-	function getSortSymbol(isSorted: boolean | SortDirection) {
-		return isSorted ? (isSorted === 'asc' ? AscSort : DscSort) : Empty
-	}
-
-	const setSorting = (updater) => {
-		if (updater instanceof Function) {
-			sorting = updater(sorting)
-		} else {
-			sorting = updater
-		}
-		options.update((old) => ({
-			...old,
-			state: {
-				...old.state,
-				sorting
+	function getFleetResults(key: string | null | undefined) {
+		return data.results?.filter((result) => {
+			if (result.Comp?.fleet) {
+				return result.Comp?.fleet === key
+			} else if (result.Comp?.fleet) {
+				return result.Comp?.fleet === key
 			}
-		}))
+			// might be a bad override here
+			return result
+		})
 	}
 
-	const options = writable<TableOptions<Result>>({
-		data: resultRows,
-		columns,
-		state: {
-			sorting,
-			columnVisibility
-		},
-		onSortingChange: setSorting,
-		getCoreRowModel: getCoreRowModel(),
-		getSortedRowModel: getSortedRowModel(),
-		onColumnVisibilityChange: setColumnVisibility,
-		debugTable: true
-	})
+	let tables
 
-	function setColumnVisibility(updater) {
-		// console.log('updater: ', updater)
-		if (updater instanceof Function) {
-			columnVisibility = updater(columnVisibility)
-		} else {
-			columnVisibility = updater
-		}
-		// console.log('columnVisibility: ', columnVisibility)
-		// TODO
-		// default visiblity could be set in event
-		// and maybe overide per race or user pref.
+	function fleetsTables() {
+		let fleetsTables: (Result & {
+			Comp: Comp | null
+		})[] = []
+		const unique = getUniqueFleetsArray()
+		// console.log('unique: ', unique)
+		unique.forEach((uf) => {
+			let fleetResults = getFleetResults(uf)
 
-		options.update((old) => ({
-			...old,
-			state: {
-				...old.state,
-				columnVisibility
-			}
-		}))
+			if (fleetResults) fleetsTables.push(fleetResults as any)
+		})
+		// console.log('fleetsTables: ', fleetsTables)
+		return fleetsTables
 	}
 
-	const table = createSvelteTable(options)
+	tables = fleetsTables()
 </script>
 
-<Page title="Results">
-	{#each $table.getAllLeafColumns() as column}
-		<div class="px-1">
-			<label>
-				<input
-					checked={column.getIsVisible()}
-					on:change={column.getToggleVisibilityHandler()}
-					type="checkbox"
-				/>{' '}
-				{column.id}
-			</label>
-		</div>
+<Page title={race?.Event?.name}>
+	{#each tables as table}
+		<FleetTable race={data.race} results={table} fleetName={table[0].Comp?.fleet} />
 	{/each}
-	<table class="table table-zebra w-full mr-10">
-		<thead>
-			{#each $table.getHeaderGroups() as headerGroup}
-				<tr>
-					{#each headerGroup.headers as header}
-						<th colSpan={header.colSpan}>
-							{#if !header.isPlaceholder}
-								<div
-									class:cursor-pointer={header.column.getCanSort()}
-									class:select-none={header.column.getCanSort()}
-									class="flex"
-									on:click={header.column.getToggleSortingHandler()}
-									on:keyup
-								>
-									<svelte:component
-										this={flexRender(header.column.columnDef.header, header.getContext())}
-									/>
-									<span class="pl-1">
-										<svelte:component this={getSortSymbol(header.column.getIsSorted())} />
-									</span>
-								</div>
-							{/if}
-						</th>
-					{/each}
-				</tr>
-			{/each}
-		</thead>
-		<tbody>
-			{#each $table.getRowModel().rows.slice(0, 10) as row}
-				<tr>
-					{#each row.getVisibleCells() as cell}
-						<td>
-							<svelte:component this={flexRender(cell.column.columnDef.cell, cell.getContext())} />
-						</td>
-					{/each}
-				</tr>
-			{/each}
-		</tbody>
-		<tfoot>
-			{#each $table.getFooterGroups() as footerGroup}
-				<tr>
-					{#each footerGroup.headers as header}
-						<th colSpan={header.colSpan}>
-							{#if !header.isPlaceholder}
-								<svelte:component
-									this={flexRender(header.column.columnDef.footer, header.getContext())}
-								/>
-							{/if}
-						</th>
-					{/each}
-				</tr>
-			{/each}
-		</tfoot>
-	</table>
 </Page>

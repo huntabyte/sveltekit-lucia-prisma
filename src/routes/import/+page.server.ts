@@ -30,14 +30,10 @@ export const actions: Actions = {
 
 		//  TODO:
 		// Impement multiple file upload
-		// just to make this an inteartive function here
-		//
-		// console.log('fd: ', fd.getAll('file'))
 
-		// const { file, org } = formData
+		//  TODO:
+		// check for duplicates etc.. before
 
-		// fd.getAll('file').forEach(async (file: any) => {
-		// 	console.log('file: ', file)
 		const texted = await file.text()
 		parse(texted, {
 			complete: async (results) => {

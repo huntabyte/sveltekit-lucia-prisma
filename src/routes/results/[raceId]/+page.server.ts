@@ -18,10 +18,10 @@ export const load = (async ({ params }) => {
 				orderBy: { position: 'asc' }
 			})
 			if (result) return result
-			return [{ error: 'no results' }]
+			// return [{ error: 'no results' }]
 		} catch (error) {
 			console.error('error: ', error)
-			return [{ error: 'no results' }]
+			// return [{ error: 'no results' }]
 		}
 	}
 	return {

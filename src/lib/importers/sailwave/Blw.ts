@@ -87,19 +87,19 @@ export default class Blw {
 				corrected: this.resultHelp('rcor', this.data, result)
 					? this.resultHelp('rcor', this.data, result)
 					: '',
-				rrestyp: this.resultHelp('rrestyp', this.data, result)
+				resultType: this.resultHelp('rrestyp', this.data, result)
 					? this.resultHelp('rrestyp', this.data, result)
 					: '',
 				elapsed: this.resultHelp('rele', this.data, result)
 					? this.resultHelp('rele', this.data, result)
 					: '',
-				srat: this.resultHelp('srat', this.data, result)
+				supposedRating: this.resultHelp('srat', this.data, result)
 					? this.resultHelp('srat', this.data, result)
 					: '',
-				rewin: this.resultHelp('rewin', this.data, result)
+				elapsedWin: this.resultHelp('rewin', this.data, result)
 					? this.resultHelp('rewin', this.data, result)
 					: '',
-				rrwin: this.resultHelp('rrwin', this.data, result)
+				ratingWin: this.resultHelp('rrwin', this.data, result)
 					? this.resultHelp('rrwin', this.data, result)
 					: '',
 				rrset: this.resultHelp('rrset', this.data, result)
