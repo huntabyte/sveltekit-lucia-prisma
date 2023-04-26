@@ -13,7 +13,14 @@
 			<div class="mx-4 mt-36 mb-8">
 				<slot />
 			</div>
+
 			<footer class="footer p-10 bg-base-200 text-base-content mb-8">
+				<button
+					class="btn"
+					on:click={() => {
+						history.back()
+					}}>Back</button
+				>
 				<div>
 					<span class="footer-title">Services</span>
 					<a href="/" class="link link-hover">Branding</a>

@@ -4,6 +4,7 @@
 	import Page from '$lib/components/layout/Page.svelte'
 	import ItemCard from '$lib/components/layout/ItemCard.svelte'
 	import Icon from '@iconify/svelte'
+	import { page } from '$app/stores'
 
 	export let data: PageData
 	$: ({ event } = data)
@@ -54,17 +55,14 @@
 						<Icon class="text-3xl text-primary" icon="material-symbols:preview" />
 					</a>
 				</div>
-				<div class="tooltip tooltip-top" data-tip="Edit Event">
-					<a href="/event/{event?.id}" class="btn btn-ghost p-1">
-						<Icon class="text-3xl  text-primary" icon="material-symbols:edit-outline" />
-					</a>
-				</div>
+				{#if data.user?.userId === event?.publisherId}
+					<div class="tooltip tooltip-top" data-tip="Edit Event">
+						<a href="/events/edit/{event?.id}?from={$page.url.pathname}" class="btn btn-ghost p-1">
+							<Icon class="text-3xl  text-primary" icon="material-symbols:edit-outline" />
+						</a>
+					</div>
+				{/if}
 			</div>
 		</div>
-		<!-- <ItemCard title={event?.name} href={event?.id}>
-			<div slot="top-right">top right</div>
-			<div slot="bottom-right">bottom</div>
-			<a href={getHref(event)}>{event?.eventwebsite} </a>
-		</ItemCard> -->
 	</Page>
 {/if}

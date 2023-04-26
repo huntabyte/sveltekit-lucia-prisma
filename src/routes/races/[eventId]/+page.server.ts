@@ -1,4 +1,5 @@
 import { prisma } from '$lib/server/prisma'
+import { error } from '@sveltejs/kit'
 import type { PageServerLoad } from './$types'
 
 export const load = (async ({ params }) => {
@@ -8,17 +9,20 @@ export const load = (async ({ params }) => {
 			return prisma.event.findUniqueOrThrow({
 				where: { id: eventId }
 			})
-		} catch (error) {
-			console.error('error: ', error)
+		} catch (err) {
+			console.error('error: ', err)
+			throw error(418, 'error')
 		}
 	}
 	const getRaces = async () => {
 		try {
 			return prisma.race.findMany({
-				where: { eventId: eventId }
+				where: { eventId: eventId },
+				orderBy: { name: 'asc' }
 			})
-		} catch (error) {
-			console.error('error: ', error)
+		} catch (err) {
+			console.error('error: ', err)
+			throw error(418, 'error')
 		}
 	}
 	return {

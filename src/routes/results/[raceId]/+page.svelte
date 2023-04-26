@@ -59,6 +59,10 @@
 
 <Page title={race?.Event?.name}>
 	{#each tables as table}
-		<FleetTable race={data.race} results={table} fleetName={table[0].Comp?.fleet} />
+		<FleetTable
+			race={data.race}
+			results={table}
+			fleetName={table[0].Comp?.fleet ?? table[0].Comp?.division}
+		/>
 	{/each}
 </Page>

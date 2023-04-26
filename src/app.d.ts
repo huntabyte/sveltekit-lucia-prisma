@@ -31,13 +31,35 @@ declare global {
 			eventburgee?: string
 		}
 
-		export type resultColumns = {
-			boat: boolean
-			fleet: boolean
-			points: boolean
-			corrected: boolean
-			finish: boolean
-		}
+		const resultColumns = z.object({
+			boat: z.boolean().nullable(),
+			skipper: z.boolean().nullable(),
+			fleet: z.boolean().nullable(),
+			points: z.boolean().nullable(),
+			elapsed: z.boolean().nullable(),
+			corrected: z.boolean().nullable(),
+			finish: z.boolean().nullable(),
+			rank: z.boolean().nullable(),
+			position: z.boolean().nullable(),
+			nett: z.boolean().nullable(),
+			total: z.boolean().nullable()
+		})
+
+		export type resultColumns = z.infer<typeof resultColumns>
+
+		// export type resultColumns = {
+		// 	boat?: boolean | string
+		// 	skipper?: boolean | string
+		// 	fleet?: boolean | string
+		// 	points?: boolean | string
+		// 	elapsed?: boolean | string
+		// 	corrected?: boolean | string
+		// 	finish?: boolean | string
+		// 	rank?: boolean | string
+		// 	position?: boolean | string
+		// 	nett?: boolean | string
+		// 	total?: boolean | string
+		// }
 
 		type fileInfo = {
 			lastModified: string

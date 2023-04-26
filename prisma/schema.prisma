@@ -15,7 +15,7 @@ generator json {
 
 datasource db {
     provider = "postgres"
-    url      = "postgresql://postgres:Beatbr0s@localhost:5432/otw"
+    url      = env("DATABASE_URL")
 }
 
 model Series {
@@ -41,14 +41,15 @@ model Event {
     uniqueIdString String        @unique
     name           String
     eventwebsite   String?
+    email          String?
     venueName      String?
     description    String?
     titleImage     String?
-    public         Boolean?      @default(true)
+    public         Boolean       @default(true)
     /// [fileInfo]
     fileInfo       Json?
     /// [resultColumns]
-    resultColumns  Json? // @default("{\"points\": false, \"nett\": false, \"total\": false, \"skipper\": false, \"place\": false}")
+    resultColumns  Json? //     @default("{\"points\": false, \"nett\": false, \"total\": false, \"skipper\": false, \"place\": false}")
     /// [eventRest]
     rest           Json?
     publisherId    String?
@@ -70,29 +71,30 @@ model Event {
 }
 
 model Race {
-    id            String    @id @unique @default(cuid())
-    raceId        String?   @unique
-    name          String?
-    starts        Json?
-    rank          String?
-    date          String?
-    time          String?
-    notes         String?
-    sailed        String?
-    resultColumns Json?
+    id               String    @id @unique @default(cuid())
+    raceId           String?
+    uniqueRaceString String?
+    name             String?
+    starts           Json?
+    rank             String?
+    date             String?
+    time             String?
+    notes            String?
+    sailed           String?
+    resultColumns    Json?
     /// [raceRest]
-    rest          Json?
-    Event         Event?    @relation(fields: [eventId], references: [id])
-    eventId       String?
-    Publisher     User?     @relation(fields: [publisherId], references: [id])
-    publisherId   String?
-    Comps         Comp[]
-    Results       Result[]
-    createdAt     DateTime? @default(now())
-    updatedAt     DateTime? @updatedAt
+    rest             Json?
+    Event            Event?    @relation(fields: [eventId], references: [id])
+    eventId          String?
+    Publisher        User?     @relation(fields: [publisherId], references: [id])
+    publisherId      String?
+    Comps            Comp[]
+    Results          Result[]
+    createdAt        DateTime? @default(now())
+    updatedAt        DateTime? @updatedAt
     // compId      String?
-    follow        follow[]
-    like          like[]
+    follow           follow[]
+    like             like[]
 }
 
 model Comp {

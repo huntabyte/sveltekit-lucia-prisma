@@ -137,7 +137,7 @@ export default class Blw {
 		return fleets
 	}
 
-	getRaces() {
+	getRaces(uniqueIdString) {
 		// new object to be returned
 		let raceData: any = []
 		// Find all raceids by getting known csv row
@@ -148,12 +148,15 @@ export default class Blw {
 		races.forEach((race: any) => {
 			let raceObj = {
 				raceId: '',
+				uniqueRaceString: '',
 				starts: '',
 				name: '',
 				rank: ''
 			}
 
 			raceObj.raceId = race[3]
+			// need to get eventeid
+			raceObj.uniqueRaceString = uniqueIdString + '_' + race.raceId
 
 			let resultRows = this.data.filter((item: any) => {
 				var regex = new RegExp(`^race`, 'g')
@@ -236,7 +239,12 @@ export default class Blw {
 		})
 
 		const { event, eventwebsite, venue, eventeid, ...rest } = eventObj
-		const uniqueIdString = event.toLowerCase().trim() + eventeid + venue.toLowerCase().trim()
+		const uniqueIdString =
+			event.toLowerCase().trim().split(' ').join('_') +
+			'-' +
+			eventeid +
+			'-' +
+			venue.toLowerCase().trim().split(' ').join('_')
 		return {
 			name: event,
 			eventwebsite,

@@ -9,8 +9,19 @@ interface CreateEventProps {
 	orgId: string
 }
 
-export function CheckForDuplicates({ data, userId, file, orgId }) {
-	//
+export async function CheckForDuplicates({ data, userId, file, orgId }) {
+	const blw = new Blw({ data, file })
+	const event = blw.getEvent()
+	const usid =
+		event.name.split(' ').join('_') +
+		'-' +
+		event.eventeid +
+		'-' +
+		event.venueName.split(' ').join('_')
+
+	return await prisma.event.findUnique({
+		where: { uniqueIdString: usid }
+	})
 }
 
 export function CreateEvent({ data, userId, file, orgId }: CreateEventProps) {
@@ -57,7 +68,7 @@ export const Populate = ({ data, userId, file, orgId }) => {
 			},
 
 			Races: {
-				create: blw.getRaces().map((race) => {
+				create: blw.getRaces(uniqueIdString).map((race) => {
 					return {
 						...race,
 						Publisher: {
@@ -119,10 +130,10 @@ export const Populate = ({ data, userId, file, orgId }) => {
 			}
 		}
 		return {
-			data: upObj
-			// where: { uniqueIdString: uniqueIdString },
-			// update: {},
-			// create: upObj
+			// data: upObj
+			where: { uniqueIdString: uniqueIdString },
+			update: {},
+			create: upObj
 		}
 	}
 
@@ -131,7 +142,8 @@ export const Populate = ({ data, userId, file, orgId }) => {
 	async function addTables() {
 		try {
 			// await prisma.event.upsert(upsertObj())
-			await prisma.event.create(upsertObj())
+			const p = await prisma.event.upsert(upsertObj())
+			// console.log('p: ', p)
 		} catch (error: any) {
 			console.log('Import Error: ', error.message)
 		}

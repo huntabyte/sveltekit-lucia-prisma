@@ -1,9 +1,10 @@
 import type { Actions, PageServerLoad } from '../$types'
-import { redirect } from '@sveltejs/kit'
-import { Populate } from '$lib/importers/sailwave'
+import { error, redirect } from '@sveltejs/kit'
+import { CheckForDuplicates, Populate } from '$lib/importers/sailwave'
 
 import { parse } from 'papaparse'
 import { prisma } from '$lib/server/prisma'
+import { goto } from '$app/navigation'
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const session = await locals.validate()
@@ -38,15 +39,29 @@ export const actions: Actions = {
 		parse(texted, {
 			complete: async (results) => {
 				const uid = await input.locals.validate()
+				const duplicates = await CheckForDuplicates({
+					data: results.data,
+					userId: uid?.userId,
+					file: file,
+					orgId: org
+				})
+
+				if (duplicates !== null) {
+					console.log('duplicates: ', duplicates)
+				}
+
 				Populate({ data: results.data, userId: uid?.userId, file: file, orgId: org })
 			},
 			error: (status, err) => {
 				// TODO
 				console.log('import error: ', status, err)
+				throw error(418, `error from import server ts ${err}`)
 			}
 		})
 		// })
-
-		return { status: 201 }
+		// history.back()
+		// goto('/events')
+		throw redirect(300, '/events')
+		// return { status: 201 }
 	}
 }

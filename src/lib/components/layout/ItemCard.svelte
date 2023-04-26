@@ -1,14 +1,15 @@
 <script lang="ts">
 	import { goto } from '$app/navigation'
-	import { svelog } from '$lib/utils'
-	import { fade, fly } from 'svelte/transition'
+	import { fade } from 'svelte/transition'
 
 	export let title: string | null
 	export let href: string | null
+	//
 </script>
 
-<div class="item-card mb-4 snap-center" in:fade={{ duration: 1000 }} out:fade={{ duration: 750 }}>
-	<header class=" flex items-center bg-base-200 rounded-tl-xl shadow-md" on:click on:keyup>
+<!-- in:fade={{ duration: 1000 }} out:fade={{ duration: 750 }} -->
+<div class="item-card mb-4 snap-center">
+	<header class=" flex items-center bg-base-200 rounded-tl-xl shadow-md">
 		<div
 			class="pl-4"
 			class:smaller={title && title.length >= 28}

@@ -1,11 +1,13 @@
 <script lang="ts">
 	import type { PageData } from './$types'
+	import { page } from '$app/stores'
 	import Page from '$lib/components/layout/Page.svelte'
 	import ItemCard from '$lib/components/layout/ItemCard.svelte'
 	import Icon from '@iconify/svelte'
 	import { formatDateTime } from '$lib/utils/formatters'
 
 	export let data: PageData
+
 	$: ({ events } = data)
 </script>
 
@@ -22,8 +24,8 @@
 					</a>
 				</div>
 				<!-- Edit should only show when current user is owner -->
-				<div class="tooltip tooltip-top" data-tip="Race Edit">
-					<a href="/event/{event?.id}" class="btn btn-ghost">
+				<div class="tooltip tooltip-top" data-tip="Event Edit">
+					<a href="/events/edit/{event?.id}?from={$page.url.pathname}" class="btn btn-ghost">
 						<Icon icon="material-symbols:edit-outline" width="24" />
 					</a>
 				</div>
