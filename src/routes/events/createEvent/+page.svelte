@@ -4,14 +4,13 @@
 	import ImportForm from '../../import/ImportForm.svelte'
 
 	export let data: PageData
-	console.log('data: ', data)
 	$: ({ orgs } = data)
 	// Start with the fact that this will add an invoice to there account
 	// Also have an option maual entry or import
 </script>
 
 <Page title="Create Event">
-	<p>*Adding an event may incure costs to your account</p>
+	<p>* Adding an event may incure costs to your account.</p>
 
 	<ul class="steps w-full maw-w-md">
 		<li class="step" class:step-primary={data.user}>Import</li>

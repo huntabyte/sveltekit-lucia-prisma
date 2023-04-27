@@ -8,10 +8,14 @@ export const load = async ({ params }) => {
 		where: { id: params.eventId },
 		include: { Venue: true }
 	})
-
-	if (!event) throw error(404, 'Not found')
-
 	const form = await superValidate(event, eventSchema)
+	if (params.eventId === 'new') {
+		// console.log('params.eventId: ', params.eventId)
+		// console.log('event: ', event)
+		console.log('form: ', form)
+	} else {
+		if (!event) throw error(404, 'Not found')
+	}
 
 	// Always return { form } in load and form actions.
 	return { form }
@@ -25,7 +29,7 @@ export const actions = {
 			// Again, always return { form } and things will just work.
 			return fail(400, { form })
 		}
-		console.log('form: ', form)
+		// console.log('form: ', form)
 		const {
 			rank,
 			points,
