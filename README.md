@@ -1,14 +1,11 @@
 # Getting Started
 
-1. Clone the repo: `git clone https://github.com/jt196/sveltekit-lucia-prisma.git`
+1. Clone the repo: `git clone https://github.com/huntabyte/sveltekit-lucia-prisma.git`
 2. Install the base packages: `npm i`
 3. Initialise the Prisma db: `npx prisma migrate dev --name init`
 4. Generate the Prisma client and types (is this typescript?): `npx prisma generate`
 
-# v1.0 Differences
+# Upgrading Lucia from v1 to v2
 
-More info [here](https://lucia-auth.com/start-here/migrate-to-version-1?sveltekit)
-
-1. The **database schema** has been every so slightly tweaked. The basic concepts and relations between models hasn't changed but check the docs for the latest version
-2. The SvelteKit integration has been deprecated. Wait! **SvelteKit support is now built into the main library.** Check the [getting started page](https://lucia-auth.com/start-here/getting-started?sveltekit) for SvelteKit in the docs on how to set up the handle hook!
-3. **API name changes**. There hasn't been any drastic name changes so you should be able to infer it from the autocomplete.
+1. 2 packages have been updated, adapter-prisma and lucia-auth (now called simply lucia), so you'll need to remove lucia-auth and run `npm i` with the updated _package.json_ file.
+2. The Prisma Lucia schema has been slightly tweaked. The default version removes two entries in the **auth_key** table, as well as removing the _auth\__ prefix to the tables. You can override the latter in the settings, which is what I've done. You'll need to run a Prisma migration with something like this command: `npx prisma migrate dev --name auth_key` so it updates the tables correctly.

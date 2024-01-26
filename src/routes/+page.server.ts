@@ -10,8 +10,10 @@ export const load: PageServerLoad = async () => {
 
 export const actions: Actions = {
 	createArticle: async ({ request, locals }) => {
-		const { session, user } = await locals.auth.validateUser()
-		if (!session || !user) {
+		const session = await locals.auth.validate()
+		if (!session || !session.user) {
+			console.log('No session or user found')
+			console.log(session)
 			throw redirect(302, '/')
 		}
 
@@ -25,7 +27,7 @@ export const actions: Actions = {
 				data: {
 					title,
 					content,
-					userId: user.userId
+					userId: session.user.userId
 				}
 			})
 		} catch (err) {
@@ -39,7 +41,7 @@ export const actions: Actions = {
 	},
 	deleteArticle: async ({ url, locals }) => {
 		const session = await locals.auth.validate()
-		if (!session) {
+		if (!session || !session.user) {
 			throw redirect(302, '/')
 		}
 		const id = url.searchParams.get('id')
@@ -54,7 +56,7 @@ export const actions: Actions = {
 				}
 			})
 
-			if (article.userId !== user.userId) {
+			if (article.userId !== session.user.userId) {
 				throw error(403, 'Not authorized')
 			}
 
