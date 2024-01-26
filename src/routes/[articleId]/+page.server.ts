@@ -3,8 +3,8 @@ import { prisma } from '$lib/server/prisma'
 import { error, fail } from '@sveltejs/kit'
 
 export const load: PageServerLoad = async ({ params, locals }) => {
-	const { session, user } = await locals.auth.validateUser()
-	if (!session || !user) {
+	const session = await locals.auth.validate()
+	if (!session || !session.user) {
 		throw error(401, 'Unauthorized')
 	}
 
@@ -17,7 +17,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		if (!article) {
 			throw error(404, 'Article not found')
 		}
-		if (article.userId !== user.userId) {
+		if (article.userId !== session.user.userId) {
 			throw error(403, 'Unauthorized')
 		}
 
@@ -25,14 +25,14 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	}
 
 	return {
-		article: getArticle(user.userId)
+		article: getArticle(session.user.userId)
 	}
 }
 
 export const actions: Actions = {
 	updateArticle: async ({ request, params, locals }) => {
-		const { session, user } = await locals.auth.validateUser()
-		if (!session || !user) {
+		const session = await locals.auth.validate()
+		if (!session || !session.user) {
 			throw error(401, 'Unauthorized')
 		}
 
@@ -48,7 +48,7 @@ export const actions: Actions = {
 				}
 			})
 
-			if (article.userId !== user.userId) {
+			if (article.userId !== session.user.userId) {
 				throw error(403, 'Forbidden to edit this article.')
 			}
 			await prisma.article.update({
